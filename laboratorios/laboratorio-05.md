@@ -1438,6 +1438,18 @@ Introduce estos errores **uno por uno** en una copia y después restáuralos:
 4. Calcular el porcentaje del cultivo mayor usando el **total general del archivo** en lugar del total de su observación. ¿Por qué cambia el significado matemático?
 5. Permitir que el modelo conserve una lista mutable recibida por referencia. ¿Cómo podría un cambio externo invalidar sus reglas?
 
-### Ampliación opcional — Fuera de las 4,5 horas
+### Reto obligatorio — Procesador de pedidos de una librería
 
-Agrega un argumento `summary` que muestre exclusivamente la cantidad de observaciones y el total general, o permite seleccionar un archivo de origen **con validación de ruta y protección de destino**. No utilices todavía HTTP ni `Future`: esos conceptos merecen una etapa separada.
+**Enunciado.** Una librería recibe sus pedidos en un archivo JSON y necesita un programa de consola que valide la información, calcule las ventas y genere una copia normalizada. El sistema debe permitir dos presentaciones distintas del informe sin modificar las reglas de los pedidos.
+
+**Requisitos**
+
+- Leer un archivo JSON con pedidos; cada pedido debe tener un identificador, el nombre de la persona compradora y uno o más productos con nombre, cantidad y precio unitario.
+- Transformar el contenido en modelos tipados que rechacen identificadores de pedido duplicados, nombres vacíos, cantidades no enteras o no positivas, precios no positivos o no finitos y totales no finitos.
+- Calcular el subtotal de cada producto, el valor total de cada pedido y la suma de todos los pedidos válidos.
+- Producir informes `compact` y `detailed` que muestren los mismos resultados numéricos, utilizando implementaciones intercambiables de un contrato de presentación.
+- Exportar los pedidos válidos a un archivo JSON normalizado **distinto del archivo de entrada**, sin sobrescribir el original.
+- No crear ni reemplazar la exportación cuando el archivo de entrada sea inexistente, el JSON esté mal formado o los datos incumplan las reglas.
+- Informar claramente los problemas de formato de datos y los errores de lectura o escritura de archivos, sin ocultar las excepciones.
+- Definir y ejecutar pruebas automatizadas para pedidos válidos, datos incorrectos, identificadores duplicados, cálculos, conversión de JSON y selección del formato de informe.
+- Mantener separados los modelos, la conversión JSON, la presentación y el acceso a archivos; no utilizar servicios HTTP ni una interfaz Flutter.
