@@ -7,6 +7,8 @@ Ruta práctica de programación con **Dart** y desarrollo de aplicaciones con **
 - [Laboratorio 01 — Primeros pasos en programación con Dart](laboratorios/laboratorio-01.md)
 - [Laboratorio 02 — Decisiones, ciclos y validación de datos en Dart](laboratorios/laboratorio-02.md)
 - [Laboratorio 03 — Funciones y colecciones en Dart](laboratorios/laboratorio-03.md)
+- Laboratorio 04 — Programación orientada a objetos: pendiente de publicación.
+- [Laboratorio 05 — POO avanzada, manejo de datos, JSON y pruebas en Dart](laboratorios/laboratorio-05.md)
 
 ## Cómo se aprende
 
