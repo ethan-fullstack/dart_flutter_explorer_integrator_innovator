@@ -1,14 +1,12 @@
 # Laboratorio 01 — Primeros pasos en programación con Dart
 
-En este laboratorio aprenderás a escribir y ejecutar programas desde cero. Comenzarás mostrando mensajes en la terminal y terminarás construyendo una pequeña **ficha de observación agrícola** que recibe datos, realiza cálculos y presenta un informe legible.
+El recorrido comienza con programas sencillos de consola en Dart y termina con una ficha de observación agrícola que solicita datos, calcula superficies y presenta un informe.
 
-No necesitas conocer Python, Java, Flutter ni ningún otro lenguaje. Aquí trabajarás únicamente con **Dart y programas de consola**. La interfaz móvil llegará en una etapa posterior, cuando los fundamentos de programación ya tengan sentido.
-
-> **Sobre los datos:** todos los nombres, cantidades y superficies que aparecen en los ejemplos son **ficticios y didácticos**. No representan estadísticas oficiales, recomendaciones agronómicas ni resultados de una fuente pública.
+Los municipios, cultivos y superficies utilizados en los ejemplos son datos ficticios; no proceden de fuentes estadísticas.
 
 ## Ruta del laboratorio
 
-| Práctica | Qué aprenderás | Tiempo de trabajo |
+| Práctica | Qué aprenderás | Duración |
 |---|---|---:|
 | 1.1 | Verificar el entorno, crear un proyecto y ejecutar el primer programa | 30 min |
 | 1.2 | Variables, tipos de datos, inferencia, `final` y `const` | 40 min |
@@ -16,11 +14,9 @@ No necesitas conocer Python, Java, Flutter ni ningún otro lenguaje. Aquí traba
 | 1.4 | Cadenas de texto, interpolación y entrada por terminal | 40 min |
 | 1.5 | Funciones, parámetros, argumentos y valores de retorno | 40 min |
 | 1.6 | Reto integrador: ficha de observación agrícola | 80 min |
-| **Total** | **Trabajo práctico guiado, ejercicios y verificaciones** | **270 min (4,5 h)** |
+| **Total** | | **270 min (4,5 h)** |
 
-Los tiempos se refieren al trabajo práctico de las seis actividades. La instalación del software puede requerir tiempo adicional según tu equipo.
-
-### Al finalizar podrás
+### Objetivos
 
 - Diferenciar un algoritmo sencillo de su implementación como programa.
 - Crear y ejecutar archivos `.dart` y localizar la función `main()`.
@@ -32,7 +28,7 @@ Los tiempos se refieren al trabajo práctico de las seis actividades. La instala
 - Separar cálculos reutilizables mediante funciones básicas.
 - Comprobar resultados, provocar errores controlados y corregirlos.
 
-**Forma de trabajo:** lee cada explicación, **predice** antes de ejecutar cuando se te indique, ejecuta el ejemplo, realiza las modificaciones propuestas y comprueba el resultado. Los fragmentos se escriben en inglés (nombres, mensajes y comentarios); las explicaciones están en español.
+Lee cada explicación, anticipa el resultado de los ejemplos, ejecútalos y comprueba las modificaciones. Los identificadores y mensajes del código están en inglés.
 
 ---
 
@@ -48,7 +44,7 @@ Un **algoritmo** es una secuencia de instrucciones para resolver un problema. Po
 
 Un **programa** expresa esas instrucciones mediante un lenguaje que el computador puede ejecutar. En este caso utilizaremos **Dart**.
 
-La **terminal** es una interfaz de texto desde la que puedes ejecutar comandos y observar sus resultados. No es necesario construir una ventana o una aplicación móvil para empezar a programar.
+La **terminal** es una interfaz de texto desde la que puedes ejecutar comandos y observar sus resultados. Los primeros programas se ejecutarán directamente en la terminal.
 
 ### 2. Verificar Dart
 
@@ -58,7 +54,7 @@ Abre una terminal (la integrada de Visual Studio Code también sirve) y ejecuta:
 dart --version
 ~~~
 
-Debes ver información sobre la versión del SDK. No es necesario que el número coincida con el de otra persona. Para esta ruta utilizaremos **Dart 3 estable**.
+Debes ver información sobre la versión del SDK. Se trabajará con una versión estable de Dart 3.
 
 Si la terminal informa que no encuentra el comando, sigue la instalación oficial para tu sistema operativo: [Obtener Dart SDK](https://dart.dev/get-dart). Si ya tienes instalado Flutter, este **incluye Dart SDK**; normalmente no hace falta instalarlo otra vez. Tras corregir la instalación o el PATH, abre una terminal nueva y verifica de nuevo.
 
@@ -313,7 +309,7 @@ void main() {
 
 `DateTime.now()` se obtiene cuando se ejecuta el programa, por eso `final` es apropiado. En cambio, `reportTitle` es un texto fijo.
 
-**Depuración:** cambia temporalmente `final startedAt` por `const startedAt`. Lee el error, explica la causa y restaura la versión válida. No necesitas estudiar todavía los objetos de fecha.
+**Depuración:** cambia temporalmente `final startedAt` por `const startedAt`. Lee el error, explica la causa y restaura la versión válida. El objetivo es observar la diferencia entre `final` y `const`.
 
 ### 5. Nombres comprensibles y null safety
 
@@ -596,7 +592,7 @@ void main() {
 }
 ~~~
 
-Primero usa entradas válidas, como `2025` y `125.5`. Luego introduce `abc` para un número y observa qué ocurre. **Todavía no es necesario corregir automáticamente entradas inválidas**: en D02 estudiarás condiciones y validaciones, y después profundizarás en excepciones.
+Primero usa entradas válidas, como `2025` y `125.5`. Luego introduce `abc` para un número y observa qué ocurre. En el Laboratorio 02 incorporarás condiciones para detectar entradas inválidas y volver a solicitarlas.
 
 ### 4. Espacios y formato
 
@@ -815,9 +811,9 @@ El programa debe:
 
 **Condiciones del primer laboratorio:** ingresa números válidos y un **total de superficie mayor que cero**. Esta es una precondición documentada del ejercicio, no una validación del programa. En D02 aprenderás a verificar entradas mediante decisiones y repeticiones.
 
-### Qué no debes añadir todavía
+### Alcance
 
-No necesitas `if`, `for`, `while`, `List`, `Map`, clases, bases de datos, Flutter, paquetes de terceros o servicios web. Esos conceptos tendrán sus propios laboratorios. Resolver el problema con variables y funciones sencillas es precisamente la meta de esta práctica.
+Resuelve el problema con variables, operaciones y funciones. Las condiciones, los ciclos y las colecciones se incorporarán en laboratorios posteriores.
 
 ### 1. Diseña la solución antes de escribirla (10 min)
 
@@ -831,7 +827,7 @@ Escribe las fórmulas que utilizarás. Piensa qué operaciones conviene poner en
 
 ### 2. Prepara el archivo y las funciones (15 min)
 
-Crea `bin/agricultural_observation.dart`. Comienza con este esqueleto **incompleto a propósito**:
+Crea `bin/agricultural_observation.dart` y completa las funciones del siguiente código inicial:
 
 ~~~dart
 import 'dart:io';
@@ -1002,11 +998,11 @@ double thirdArea = 50.0;
 
 Conserva las mismas funciones y cálculos. Esta variante te permite estudiar el procesamiento, pero **no sustituye la comprobación de entrada por terminal** cuando dispongas del SDK.
 
-### Reto obligatorio — Presupuesto de una excursión
+### Reto de aplicación — Presupuesto de una excursión
 
-**Enunciado.** Una empresa de turismo necesita un programa de consola que prepare el presupuesto de una excursión para un grupo de personas. El programa debe calcular los costos del viaje y presentar cuánto corresponde pagar por persona.
+Una empresa de turismo necesita un programa de consola que prepare el presupuesto de una excursión para un grupo de personas. El programa debe calcular los costos del viaje y presentar cuánto corresponde pagar por persona.
 
-**Requisitos**
+El programa debe:
 
 - Solicitar el destino, la cantidad de viajeros, los días de viaje, las noches de alojamiento, el costo total de transporte, el costo de alojamiento por noche para todo el grupo y el costo diario de alimentación por persona.
 - Calcular el costo total del alojamiento, el costo total de alimentación del grupo y el presupuesto general de la excursión.
