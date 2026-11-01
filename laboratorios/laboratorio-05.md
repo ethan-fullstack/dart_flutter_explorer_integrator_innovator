@@ -1171,3 +1171,342 @@ Comprueba que el mensaje de fallo de cada prueba permita identificar **qué regl
 
 ---
 
+## Práctica 5.6 — Reto integrador: procesador agrícola con JSON (65 min)
+
+### El problema
+
+AgroDiversa dispone ahora de modelos tipados, validación de datos, un codec JSON y formateadores intercambiables. Falta conectar esas piezas en un programa capaz de **procesar un archivo completo sin mezclar las responsabilidades**.
+
+Construirás una herramienta de consola que leerá el archivo ficticio `data/observations.json`, comprobará sus registros, calculará estadísticas y escribirá una **copia normalizada** en `data/normalized_observations.json`. El programa deberá admitir dos formatos de informe y comunicar claramente los errores.
+
+A diferencia del reto del Laboratorio 03, no introducirás observaciones manualmente: **el archivo JSON es la fuente del ejercicio**. Esto permite centrarte en arquitectura, persistencia y pruebas.
+
+### Requisitos funcionales
+
+El programa deberá:
+
+1. Abrir `data/observations.json` desde la raíz del proyecto.
+2. Decodificarlo mediante `RecordJsonCodec`, no mediante un bloque de JSON incrustado en `main()`.
+3. Rechazar documentos con estructura inválida, datos inválidos o claves de observación duplicadas.
+4. Mostrar la cantidad de observaciones válidas.
+5. Presentar para cada observación su municipio, año, cantidad de cultivos, área total, promedio y cultivo de mayor área.
+6. Calcular el porcentaje del cultivo mayor respecto de **su propia observación**.
+7. Permitir los formatos `compact` y `detailed` sin duplicar cálculos.
+8. Mostrar el total general de las superficies de todas las observaciones y comprobar que sea finito.
+9. Escribir los datos normalizados **en un archivo diferente del origen**, únicamente cuando la lectura y validación hayan terminado correctamente.
+10. Comunicar por separado problemas de formato y problemas del sistema de archivos, sin capturar indiscriminadamente todos los errores.
+11. Aceptar la lista JSON vacía `[]` como un resultado sin observaciones: deberá informar que no hay datos y no dividir entre cero.
+12. Mantener una suite de pruebas unitarias para las invariantes y las conversiones, además de los escenarios manuales del programa de consola.
+
+**No se necesita** Flutter, base de datos, API HTTP, generadores de código ni paquetes de arquitectura. El único paquete añadido es `test` como dependencia de desarrollo.
+
+### Reglas del escenario
+
+El archivo utiliza el esquema didáctico definido en la práctica 5.4:
+
+~~~json
+[
+  {
+    "municipality": "Andes",
+    "year": 2025,
+    "crops": [
+      {"name": "Coffee", "plantedArea": 125.0},
+      {"name": "Plantain", "plantedArea": 75.0},
+      {"name": "Avocado", "plantedArea": 50.0}
+    ]
+  },
+  {
+    "municipality": "La Mesa",
+    "year": 2024,
+    "crops": [
+      {"name": "Cocoa", "plantedArea": 20.0},
+      {"name": "Beans", "plantedArea": 30.0}
+    ]
+  }
+]
+~~~
+
+Las cifras son **inventadas**. Los números sirven para verificar fórmulas:
+
+| Observación | Cultivos | Área total | Promedio | Cultivo de mayor área |
+|---|---:|---:|---:|---|
+| Andes (2025) | 3 | 250.00 ha | 83.33 ha | Coffee: 125.00 ha (50.00%) |
+| La Mesa (2024) | 2 | 50.00 ha | 25.00 ha | Beans: 30.00 ha (60.00%) |
+| **Total del archivo** | **5 registros de cultivo** | **300.00 ha** | — | — |
+
+El total general suma superficies de **registros de observación**. No lo presentes como superficie geográfica total del municipio ni como área oficial de Colombia.
+
+### Etapa 1 — Verificar los contratos disponibles (10 min)
+
+Antes de modificar `main()`, revisa que se puedan utilizar desde la importación pública:
+
+~~~dart
+import 'package:dart_lab_05/agrodiversa.dart';
+~~~
+
+Debes tener disponibles:
+
+- `CropArea` con validación y propiedades `name` y `plantedArea`.
+- `AgriculturalRecord` con `municipality`, `year`, `crops`, `totalArea`, `averageArea` y `largestCrop`.
+- `ReportFormatter`, `CompactFormatter` y `DetailedFormatter`.
+- `RecordJsonCodec` con `decodeRecords` y `encodeRecords`.
+
+**Comprobación previa:** si el analizador no encuentra alguna clase, comprueba `lib/agrodiversa.dart` y las rutas internas. No resuelvas el problema copiando todas las clases dentro de `bin/agrodiversa_cli.dart`.
+
+### Etapa 2 — Elegir el formato desde argumentos (10 min)
+
+El comando tendrá una forma sencilla:
+
+~~~bash
+dart run bin/agrodiversa_cli.dart compact
+dart run bin/agrodiversa_cli.dart detailed
+~~~
+
+Si no se indica formato, `compact` será el predeterminado. Con otro argumento, el programa debe informar el uso correcto y terminar sin abrir archivos.
+
+Reemplaza el `main()` provisional de `bin/agrodiversa_cli.dart` por este **esqueleto de integración**:
+
+~~~dart
+import 'dart:io';
+
+import 'package:dart_lab_05/agrodiversa.dart';
+
+ReportFormatter? selectFormatter(List<String> arguments) {
+  String format = arguments.isEmpty ? 'compact' : arguments.first;
+
+  if (arguments.length > 1) {
+    return null;
+  }
+
+  switch (format) {
+    case 'compact':
+      return CompactFormatter();
+    case 'detailed':
+      return DetailedFormatter();
+    default:
+      return null;
+  }
+}
+
+void main(List<String> arguments) {
+  ReportFormatter? formatter = selectFormatter(arguments);
+
+  if (formatter == null) {
+    stderr.writeln('Usage: dart run bin/agrodiversa_cli.dart [compact|detailed]');
+    exitCode = 2;
+    return;
+  }
+
+  // TODO: Read, decode, report, and export the observations.
+}
+~~~
+
+**Observa:** `selectFormatter` no lee archivos ni imprime. Únicamente elige una implementación. `exitCode` comunica a la terminal un resultado no exitoso cuando se recibe un argumento desconocido. El código todavía no es la solución terminada.
+
+### Etapa 3 — Leer y decodificar correctamente (10 min)
+
+Dentro de `main`, después de seleccionar el formateador, crea:
+
+~~~dart
+File sourceFile = File('data/observations.json');
+File outputFile = File('data/normalized_observations.json');
+RecordJsonCodec codec = RecordJsonCodec();
+~~~
+
+Organiza el resto de la operación en un `try` que:
+
+1. Obtenga `String source = sourceFile.readAsStringSync();`.
+2. Obtenga `List<AgriculturalRecord> records = codec.decodeRecords(source);`.
+3. Muestre `'No observations available.'` si la lista está vacía.
+4. Si hay observaciones, las recorra y muestre sus estadísticas.
+5. Genere el texto de exportación mediante `codec.encodeRecords(records)`.
+6. Escriba ese texto con `outputFile.writeAsStringSync(normalizedJson)`.
+
+Maneja de forma explícita estas excepciones, después del bloque `try`:
+
+~~~dart
+on FileSystemException catch (error) {
+  stderr.writeln('File error: ' + error.message);
+  exitCode = 1;
+} on FormatException catch (error) {
+  stderr.writeln('Invalid agricultural data: ' + error.message);
+  exitCode = 1;
+}
+~~~
+
+Los manejadores anteriores son una **continuación del `try`**, no funciones independientes. Dentro de `main()` debe existir un único bloque `try { ... } on ... on ...`.
+
+**Orden importante:** la escritura debe ocurrir **después** de decodificar y comprobar todos los registros. Así, un documento parcialmente válido no produce una exportación de datos incompletos.
+
+### Etapa 4 — Presentar estadísticas sin repetir cálculos (15 min)
+
+Para cada objeto `AgriculturalRecord`, usa:
+
+~~~dart
+double total = record.totalArea;
+double average = record.averageArea;
+CropArea largest = record.largestCrop;
+double largestShare = largest.plantedArea / total * 100;
+~~~
+
+En este ejemplo, el constructor garantiza una lista no vacía y un total positivo y finito. Cuando se reciban datos de otras fuentes, esas garantías tendrán que mantenerse o comprobarse.
+
+Construye un título a partir de municipio y año:
+
+~~~dart
+String title = record.municipality + ' (' + record.year.toString() + ')';
+~~~
+
+Usa `formatter.format(title, total)` para producir el encabezado de la observación. Muestra después cantidad de cultivos, promedio, nombre y superficie del mayor cultivo y su porcentaje. Para cifras, usa `toStringAsFixed(2)`.
+
+Para el total general, puedes utilizar `fold`:
+
+~~~dart
+double grandTotal = records.fold<double>(
+  0.0,
+  (sum, record) => sum + record.totalArea,
+);
+
+if (!grandTotal.isFinite) {
+  throw FormatException('Combined area is not finite.');
+}
+~~~
+
+**Por qué verificar otra vez:** aunque cada registro tenga un total válido, sumar muchos registros con valores extremadamente grandes también podría producir un número no finito.
+
+**Evita duplicar cálculo en el formateador:** el formateador debe preocuparse por cómo presentar un resultado que ya existe, no por abrir archivos ni repetir toda la lógica de los modelos.
+
+### Etapa 5 — Proteger la exportación y revisar el código (10 min)
+
+El texto normalizado debe escribirse exclusivamente en:
+
+~~~text
+data/normalized_observations.json
+~~~
+
+No se debe sobrescribir `data/observations.json`.
+
+Asegúrate de que el programa **no** intente escribir el archivo cuando:
+
+- El JSON de origen no puede decodificarse.
+- Una observación contiene campos con tipos incorrectos.
+- Se detectan cultivos o claves de observación duplicadas.
+- Los cálculos del conjunto producen un total no finito.
+
+Para comprobar la regla, elimina antes de cada prueba de fallo cualquier archivo de salida generado en una ejecución correcta. Así podrás observar que el fallo **no crea un archivo nuevo**. Si el archivo de salida ya existía, el programa debe dejarlo intacto al fallar antes de la escritura.
+
+Ejecuta:
+
+~~~bash
+dart format lib bin test
+dart analyze
+dart test
+dart run bin/agrodiversa_cli.dart compact
+dart run bin/agrodiversa_cli.dart detailed
+~~~
+
+**No confundas estas operaciones:** formatear el código, analizarlo, ejecutar pruebas y utilizar la aplicación son verificaciones diferentes.
+
+### Etapa 6 — Casos de prueba del producto (10 min)
+
+Trabaja con una **copia temporal del archivo de entrada** para cada modificación y recupera el JSON original después de cada experimento.
+
+| Caso | Datos o comando | Resultado esperado |
+|---|---|---|
+| A — Archivo válido | Dos observaciones del ejemplo | Totales 250.00 y 50.00; total general 300.00 ha; exportación |
+| B — Formato compacto | Ejecutar con `compact` | Utiliza `CompactFormatter` sin cambiar los cálculos |
+| C — Formato detallado | Ejecutar con `detailed` | Utiliza `DetailedFormatter` con los mismos números |
+| D — Argumento inválido | Ejecutar con `unknown` | Muestra uso correcto; termina con código distinto de cero |
+| E — Archivo inexistente | Cambiar temporalmente la ruta de entrada | Muestra error de archivo; no genera exportación nueva |
+| F — JSON defectuoso | Eliminar un corchete | Muestra error de formato; no genera exportación nueva |
+| G — Tipo incorrecto | Poner `"125"` como superficie de Coffee | Rechaza el registro; no genera exportación nueva |
+| H — Duplicado | Duplicar Andes 2025 con otras mayúsculas | Rechaza las observaciones duplicadas |
+| I — Sin observaciones | Sustituir contenido por `[]` | Informa que no hay observaciones; no divide entre cero; exporta `[]` |
+| J — Área inválida | Poner `0` o `-2` en un cultivo | Lanza `FormatException` al construir el modelo |
+| K — Empate | Dos cultivos de igual mayor área | Conserva el primero registrado |
+| L — Archivo intacto | Ejecutar A y comparar el origen | El archivo de entrada sigue sin modificaciones |
+
+**En los casos de error**, la salida normalizada de una ejecución previa podría existir: eso **no significa** que el programa haya generado una exportación válida para el archivo defectuoso. Elimina el archivo de salida antes de la prueba o comprueba su contenido y fecha para verificar que el proceso fallido no lo reemplazó.
+
+### Depuración final
+
+Introduce estos errores **uno por uno** en una copia y después restáuralos:
+
+1. Capturar cualquier excepción sin mostrarla. ¿Cómo se pierde la causa del fallo?
+2. Escribir el archivo normalizado antes de validar todas las observaciones. ¿Qué riesgo genera?
+3. Instanciar `CompactFormatter` dentro del ciclo de observaciones, ignorando el argumento del programa. ¿Qué responsabilidad se mezcla?
+4. Calcular el porcentaje del cultivo mayor usando el **total general del archivo** en lugar del total de su observación. ¿Por qué cambia el significado matemático?
+5. Permitir que el modelo conserve una lista mutable recibida por referencia. ¿Cómo podría un cambio externo invalidar sus reglas?
+
+### Ampliación opcional — Fuera de las 4,5 horas
+
+Agrega un argumento `summary` que muestre exclusivamente la cantidad de observaciones y el total general, o permite seleccionar un archivo de origen **con validación de ruta y protección de destino**. No utilices todavía HTTP ni `Future`: esos conceptos merecen una etapa separada.
+
+---
+
+## Entrega y autoevaluación
+
+Conserva en tu proyecto:
+
+- Código modular de `lib/`, incluyendo modelos, formateadores y codec.
+- Programa de consola `bin/agrodiversa_cli.dart`.
+- Archivo ficticio de entrada `data/observations.json`.
+- Pruebas automáticas de modelos y codec dentro de `test/`.
+- Archivo normalizado de salida como resultado de ejecución, sin sobrescribir el origen.
+
+No se exige un informe extenso ni capturas de todas las operaciones. Lo importante es el **código que funciona, las decisiones que puedes explicar y las verificaciones que puedes reproducir**.
+
+### Lista de comprobación
+
+- [ ] Puedo explicar herencia, interfaz y composición con ejemplos distintos.
+- [ ] Uso polimorfismo para intercambiar formateadores.
+- [ ] Las reglas de `CropArea` y `AgriculturalRecord` no dependen de la terminal.
+- [ ] Diferencio `null`, dato inválido y excepción.
+- [ ] Las importaciones siguen la estructura `bin/`, `lib/` y `test/`.
+- [ ] El codec convierte JSON a objetos y objetos a JSON.
+- [ ] Los datos inválidos producen errores explícitos.
+- [ ] Los archivos de origen y salida son diferentes.
+- [ ] Los resultados numéricos se calculan desde modelos, no se escriben a mano.
+- [ ] Los dos formatos producen los mismos resultados matemáticos.
+- [ ] Implementé pruebas de validación, cálculos, errores y conversión JSON.
+- [ ] Comprobé los casos A–L de la integración.
+- [ ] `dart analyze` y `dart test` se ejecutan sin problemas pendientes.
+- [ ] Eliminé los fragmentos `TODO` y `UnimplementedError` de la implementación final.
+
+### Preguntas para explicar tu solución
+
+1. ¿Por qué `CropArea` y `AgriculturalRecord` no necesitan heredar uno del otro?
+2. ¿Qué beneficio tiene `ReportFormatter` como interfaz?
+3. ¿Qué ventaja ofrece inyectar un formateador?
+4. ¿Qué invariantes garantiza el constructor del registro agrícola?
+5. ¿Por qué `jsonDecode` necesita una etapa de conversión a modelos?
+6. ¿Qué sucede al buscar un campo ausente o de tipo incorrecto en un mapa JSON?
+7. ¿Cuál es la diferencia entre errores de formato y errores del sistema de archivos?
+8. ¿Por qué el codec no debe leer archivos directamente?
+9. ¿Qué comprobación corresponde a una prueba unitaria y cuál a una prueba manual de integración?
+10. ¿Por qué no conviene sobrescribir el archivo de origen?
+11. ¿Qué ocurre si se recibe un arreglo JSON vacío?
+12. ¿Por qué un total que funciona en una observación puede desbordarse al sumar muchas observaciones?
+
+### Criterios de finalización
+
+El laboratorio está completo cuando puedes **leer, validar, calcular, presentar y exportar observaciones**, demostrar los dos formateadores, comprobar los errores del archivo y reproducir las pruebas automáticas. La revisión estática no sustituye las pruebas de resultados y de fallos.
+
+## Continuidad — Laboratorio 06
+
+Ya tienes un núcleo que trabaja con modelos, datos y formatos sin depender de Flutter. En el **Laboratorio 06** introducirás `Future`, `async`, `await`, operaciones HTTP, manejo de errores de red y nociones introductorias de `Stream`. El objetivo será cambiar la procedencia de los datos sin desorganizar el modelo ni las reglas ya aprendidas.
+
+## Referencias oficiales
+
+- [Dart — Clases](https://dart.dev/language/classes)
+- [Dart — Modificadores de clases](https://dart.dev/language/class-modifiers)
+- [Dart — Constructores](https://dart.dev/language/constructors)
+- [Dart — Null safety](https://dart.dev/null-safety)
+- [Dart — Manejo de errores](https://dart.dev/language/error-handling)
+- [Dart — Uso de JSON](https://dart.dev/libraries/serialization/json)
+- [Dart — JSON y modelos tipados](https://dart.dev/learn/tutorial/data-and-json)
+- [Dart — Paquetes y organización](https://dart.dev/tools/pub/package-layout)
+- [Dart — Clase File](https://api.dart.dev/dart-io/File-class.html)
+- [Dart — Pruebas](https://dart.dev/tools/testing)
+- [Dart — Tutorial de pruebas](https://dart.dev/learn/tutorial/testing)
+- [Dart — Análisis estático](https://dart.dev/tools/dart-analyze)
