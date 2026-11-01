@@ -985,3 +985,430 @@ Partiendo de un mapa de cuatro cultivos y sus áreas, genera:
 
 ---
 
+## Práctica 3.6 — Reto integrador: catálogo de observaciones agrícolas (80 min)
+
+### El problema
+
+El programa del Laboratorio 02 conserva únicamente el último resumen. Ahora construirás **AgroDiversa Catalog**, una aplicación de consola que guarda varias observaciones, cada una identificada por municipio y año, y permite consultar sus cultivos y estadísticas. Todo permanece **en memoria hasta cerrar la aplicación**.
+
+### Requisitos de funcionamiento
+
+1. Registrar una observación con municipio, año y entre uno y cinco cultivos.
+2. Guardar varias observaciones sin sobrescribir las anteriores.
+3. Rechazar un municipio y año ya registrados, ignorando espacios exteriores y diferencias de mayúsculas.
+4. Rechazar nombres duplicados de cultivos **dentro de la misma observación** y volver a solicitar otro nombre.
+5. Validar año, cantidad y superficies mediante las funciones de lectura del Laboratorio 02.
+6. Listar las observaciones guardadas, ordenadas por su clave.
+7. Buscar una observación por municipio y año, sin volver a solicitar sus áreas.
+8. Mostrar por observación: cultivos, áreas, total, promedio, mayor superficie y participación del cultivo mayor.
+9. Mostrar un catálogo ordenado de nombres de cultivos distintos entre **todas** las observaciones.
+10. Informar cuando no hay registros, cuando una clave no existe y cuando termina la entrada.
+
+Usarás los siguientes tipos:
+
+~~~dart
+Map<String, Map<String, double>> observations = <String, Map<String, double>>{};
+~~~
+
+El mapa externo relaciona una **clave de observación** con un mapa de cultivos. El mapa interno relaciona el **nombre del cultivo** con su superficie. Una observación se identificará, por ejemplo, mediante la clave normalizada `andes (2025)`.
+
+> **Reglas del escenario:** los años de `2000` a `2100`, las superficies positivas y finitas y el máximo de cinco cultivos son límites **didácticos**, no requisitos de un conjunto de datos público. Ante un empate de superficies máximas, se conservará el **primer** cultivo ingresado. No deduzcas diagnósticos agrícolas a partir de estos cálculos.
+
+### Ejemplo de menú
+
+~~~text
+==================================
+        AGRODIVERSA CATALOG
+==================================
+1. Register observation
+2. List observations
+3. View observation details
+4. Show unique crop names
+0. Exit
+Option:
+~~~
+
+### Etapa 1 — Diseñar funciones y datos (10 min)
+
+Antes de programar, define qué responsabilidad tiene cada función:
+
+| Función | Qué hace |
+|---|---|
+| `createObservationKey` | Normaliza municipio y año en una clave |
+| `readRequiredText`, `readIntInRange`, `readPositiveArea` | Leen y validan entradas |
+| `readUniqueCropName` | Rechaza nombres ya presentes en el mapa actual |
+| `registerObservation` | Construye y guarda una observación completa |
+| `listObservations` | Muestra las claves disponibles |
+| `viewObservation` | Busca una observación y solicita su resumen |
+| `calculateTotalArea` | Devuelve un total sin imprimir |
+| `showObservationSummary` | Presenta los datos de una observación |
+| `showUniqueCrops` | Deriva nombres únicos del catálogo |
+
+**Preguntas de diseño:** ¿qué información debe sobrevivir a cada vuelta del menú? ¿Por qué el mapa local de la captura debe guardarse solo cuando está completo? ¿Por qué el total puede calcularse a partir de los datos guardados sin almacenarlo dos veces?
+
+### Etapa 2 — Preparar archivo y reutilizar lectores (10 min)
+
+Crea `bin/agricultural_catalog.dart`:
+
+~~~dart
+import 'dart:io';
+~~~
+
+Debajo del `import`, copia las **implementaciones completas** de estas tres funciones desde tu Laboratorio 02, práctica 2.5. No copies un segundo `main()`:
+
+- `String? readRequiredText(String prompt)`
+- `int? readIntInRange(String prompt, int minimum, int maximum)`
+- `double? readPositiveArea(String prompt)`
+
+Cada función debe devolver `null` cuando termine la entrada estándar y reintentar cuando el valor sea inválido.
+
+Agrega la función de clave:
+
+~~~dart
+String createObservationKey(String municipality, int year) {
+  String normalized = municipality.trim().toLowerCase();
+  return '$normalized ($year)';
+}
+~~~
+
+Comprueba temporalmente que `createObservationKey('Andes', 2025)` y `createObservationKey(' ANDES ', 2025)` producen **la misma cadena**. En la versión final el archivo debe tener un solo `main()`.
+
+**Decisión consciente:** esta versión guarda las claves y los nombres de cultivos normalizados en minúsculas. Una versión orientada a objetos podrá conservar por separado las etiquetas originales para presentación.
+
+### Etapa 3 — Menú persistente (10 min)
+
+Agrega este esqueleto, que **no es una solución terminada**:
+
+~~~dart
+void main() {
+  Map<String, Map<String, double>> observations =
+      <String, Map<String, double>>{};
+
+  while (true) {
+    print('1. Register observation');
+    print('2. List observations');
+    print('3. View observation details');
+    print('4. Show unique crop names');
+    print('0. Exit');
+
+    int? option = readIntInRange('Option: ', 0, 4);
+
+    if (option == null || option == 0) {
+      print('Goodbye!');
+      return;
+    }
+
+    switch (option) {
+      case 1:
+        // TODO: Register an observation and handle end of input.
+        print('Registration not implemented yet.');
+      case 2:
+        // TODO: List saved observations.
+        print('Listing not implemented yet.');
+      case 3:
+        // TODO: Find an observation and handle end of input.
+        print('Search not implemented yet.');
+      case 4:
+        // TODO: Show distinct crop names.
+        print('Catalog not implemented yet.');
+      default:
+        print('Unknown option.');
+    }
+  }
+}
+~~~
+
+Las variables `observations` deben estar **fuera del ciclo** para que sus datos no se pierdan al volver al menú. Sustituirás cada mensaje `not implemented yet` por una llamada a la función correspondiente.
+
+### Etapa 4 — Registrar sin sobrescribir (20 min)
+
+Primero, agrega antes de `main()` esta función para obtener un nombre **nuevo en la observación actual**:
+
+~~~dart
+String? readUniqueCropName(
+  String prompt,
+  Map<String, double> currentCrops,
+) {
+  while (true) {
+    String? name = readRequiredText(prompt);
+
+    if (name == null) {
+      return null;
+    }
+
+    String normalized = name.trim().toLowerCase();
+
+    if (!currentCrops.containsKey(normalized)) {
+      return normalized;
+    }
+
+    print('Crop already registered in this observation.');
+  }
+}
+~~~
+
+Después crea `bool registerObservation(Map<String, Map<String, double>> observations)`. Su responsabilidad será leer y guardar un registro completo. Usa este plan:
+
+1. Solicita `municipality` mediante `readRequiredText`.
+2. Solicita `year` mediante `readIntInRange`, con límites `2000` y `2100`.
+3. Si termina la entrada de cualquiera de los lectores, devuelve `false`.
+4. Construye la clave con `createObservationKey`.
+5. Si `observations.containsKey(key)` es verdadero, informa `'Observation already exists.'` y devuelve `true` **sin modificar ningún dato**.
+6. Solicita `cropCount` entre `1` y `5`.
+7. Crea un mapa local `Map<String, double> currentCrops = <String, double>{};`.
+8. Utiliza `for` para leer `cropCount` pares de nombre y área. Si la entrada termina, devuelve `false`.
+9. Guarda **solo al final** `observations[key] = Map<String, double>.from(currentCrops);`.
+10. Muestra `'Observation saved in memory.'` y devuelve `true`.
+
+Completa este esqueleto del ciclo **dentro de `registerObservation`**:
+
+~~~dart
+for (int index = 1; index <= cropCount; index++) {
+  String? cropName = readUniqueCropName(
+    'Crop $index name: ',
+    currentCrops,
+  );
+
+  if (cropName == null) {
+    return false;
+  }
+
+  double? area = readPositiveArea('Crop $index area (ha): ');
+
+  if (area == null) {
+    return false;
+  }
+
+  currentCrops[cropName] = area;
+}
+~~~
+
+El código supone que ya declaraste `cropCount` como entero no nulo y `currentCrops` como mapa local tras validar las entradas.
+
+**No modifiques el catálogo principal mientras la captura está incompleta.** Si termina la entrada, la función devuelve `false` y el menú termina sin guardar un mapa parcial.
+
+Reemplaza el `case 1` por la llamada a `registerObservation(observations)` y termina `main()` si retorna `false`. Un registro duplicado debe devolver `true` para volver normalmente al menú.
+
+### Etapa 5 — Listar, buscar y calcular (20 min)
+
+Implementa el listado de claves:
+
+~~~dart
+void listObservations(
+  Map<String, Map<String, double>> observations,
+) {
+  if (observations.isEmpty) {
+    print('No observations registered.');
+    return;
+  }
+
+  List<String> keys = observations.keys.toList();
+  keys.sort();
+
+  for (final key in keys) {
+    print(key);
+  }
+}
+~~~
+
+Reemplaza el `case 2` por `listObservations(observations);`.
+
+La función `bool viewObservation(Map<String, Map<String, double>> observations)` deberá:
+
+1. Leer municipio y año (con los lectores validados).
+2. Devolver `false` si termina la entrada.
+3. Crear la clave usando `createObservationKey`.
+4. Recuperar `Map<String, double>? crops = observations[key];`.
+5. Si `crops == null`, mostrar `'Observation not found.'` y devolver `true`.
+6. Si existe, llamar a `showObservationSummary(key, crops)` y devolver `true`.
+
+Puedes aprovechar esta función ya completa para el total:
+
+~~~dart
+double calculateTotalArea(Map<String, double> crops) {
+  return crops.values.fold<double>(
+    0.0,
+    (total, area) => total + area,
+  );
+}
+~~~
+
+Crea `void showObservationSummary(String key, Map<String, double> crops)`. Debe:
+
+- Comprobar `crops.isEmpty` antes de dividir por la cantidad de cultivos.
+- Mostrar la clave, seguida por los cultivos y sus superficies en orden alfabético.
+- Calcular total con `calculateTotalArea(crops)`.
+- Calcular promedio como total dividido entre `crops.length`.
+- Recorrer `crops.entries` para identificar el mayor, actualizando únicamente si `entry.value > largestArea`.
+- Calcular `largestArea / totalArea * 100` solo cuando `totalArea > 0`.
+- Mostrar cifras mediante `toStringAsFixed(2)`.
+
+Esqueleto de cálculo:
+
+~~~dart
+void showObservationSummary(
+  String key,
+  Map<String, double> crops,
+) {
+  if (crops.isEmpty) {
+    print('No crops available.');
+    return;
+  }
+
+  double totalArea = calculateTotalArea(crops);
+  double averageArea = totalArea / crops.length;
+
+  String largestCrop = '';
+  double largestArea = 0.0;
+
+  for (final entry in crops.entries) {
+    if (entry.value > largestArea) {
+      largestArea = entry.value;
+      largestCrop = entry.key;
+    }
+  }
+
+  double largestShare = largestArea / totalArea * 100;
+
+  // TODO: Print key, sorted crops and formatted statistics.
+}
+~~~
+
+El esqueleto asume la regla de entrada del ejercicio: **al menos un cultivo y solo áreas positivas y finitas**. Cuando se carguen archivos o datos externos, esas precondiciones deberán validarse nuevamente.
+
+Conecta `viewObservation(observations)` al `case 3`, terminando `main()` si devuelve `false`.
+
+### Etapa 6 — Mostrar cultivos únicos y comprobar (10 min)
+
+Agrega esta función:
+
+~~~dart
+void showUniqueCrops(
+  Map<String, Map<String, double>> observations,
+) {
+  Set<String> uniqueCrops = <String>{};
+
+  for (final crops in observations.values) {
+    uniqueCrops.addAll(crops.keys);
+  }
+
+  if (uniqueCrops.isEmpty) {
+    print('No crops available.');
+    return;
+  }
+
+  List<String> sortedNames = uniqueCrops.toList();
+  sortedNames.sort();
+
+  print('Unique crop names: ' + sortedNames.length.toString());
+
+  for (final name in sortedNames) {
+    print(name);
+  }
+}
+~~~
+
+Reemplaza el `case 4` por `showUniqueCrops(observations);`. Este conjunto se calcula **sin eliminar entradas ni modificar los mapas originales**.
+
+### Pruebas manuales obligatorias
+
+| Caso | Acciones | Resultado esperado |
+|---|---|---|
+| A — Vacío | Listar, buscar y consultar cultivos sin registrar | No falla; muestra mensajes informativos |
+| B — Primera observación | Andes, 2025: coffee 125, plantain 75, avocado 50 | Total 250.00; promedio 83.33; máximo coffee 125.00; participación 50.00% |
+| C — Segunda observación | Andes, 2024: coffee 110, beans 40 | Se conservan las dos observaciones; nueva suma 150.00 |
+| D — Tercera observación | La Mesa, 2025: cocoa 20, plantain 30 | La tercera clave existe y se consulta por separado |
+| E — Clave duplicada | Registrar ` ANDES `, 2025 después de B | No sustituye la primera observación |
+| F — Cultivo duplicado | En una captura ingresar `Coffee` y después ` coffee ` | Repite la solicitud del nombre; no sobrescribe la primera área |
+| G — Nombres únicos | Después de B, C y D utilizar opción 4 | Cinco nombres: avocado, beans, cocoa, coffee, plantain |
+| H — Un cultivo | Una observación con área 12.5 | Total y promedio 12.50; participación 100.00% |
+| I — Empate | rice 20, cocoa 20, beans 10 | Conserva rice como máximo; total 50.00; participación 40.00% |
+| J — Entradas inválidas | Año `abc`; cantidad `0`; áreas `NaN`, `-2` y luego 12.5 | Reintenta y solo guarda valores válidos |
+| K — No existe | Buscar municipio y año no registrados | Avisa que no existe y vuelve al menú |
+| L — Fin de entrada | Terminar entrada durante una captura | Sale sin ciclo infinito ni guardar una observación parcial |
+
+**Comprueba tres magnitudes diferentes:** en las observaciones B, C y D hay **3 observaciones**, **7 registros individuales de cultivo** (3 + 2 + 2) y **5 nombres únicos**.
+
+### Verificación del código
+
+Desde la raíz del proyecto, con errores intencionales corregidos:
+
+~~~bash
+dart format bin
+dart analyze
+dart run bin/agricultural_catalog.dart
+~~~
+
+El analizador busca problemas estáticos, pero no garantiza que tus resultados matemáticos sean correctos. Por ello son obligatorias las comprobaciones numéricas y de comportamiento.
+
+### Laboratorio de errores — Corrige uno por uno
+
+Trabaja en una copia temporal y restaura la versión válida tras cada experimento:
+
+1. **Datos que desaparecen:** crea `observations` dentro de `while`. ¿Por qué se reinicia el catálogo con cada vuelta?
+2. **Sobrescritura:** omite `containsKey` al registrar y guarda la misma clave por segunda vez.
+3. **Nombre repetido:** elimina la comprobación de nombre de cultivo duplicado.
+4. **Empate incorrecto:** actualiza el máximo con `>=` en lugar de `>`.
+5. **Resultado desactualizado:** guarda un total calculado y cambia después las áreas sin recalcularlo.
+6. **Modificación compartida:** modifica un mapa interior al que apuntan dos referencias y observa que el cambio afecta a ambas.
+
+### Ampliación opcional — Fuera de las 4,5 horas
+
+Incorpora una opción para comparar cultivos comunes y distintos entre dos observaciones con `Set.intersection` y `Set.difference`, o muestra solo los cultivos que superen un umbral introducido por el usuario.
+
+No avances todavía a clases, persistencia o APIs: esos temas tendrán laboratorios dedicados.
+
+---
+
+## Entrega y autoevaluación
+
+Conserva `bin/agricultural_catalog.dart` como producto principal y los archivos de las cinco prácticas anteriores. La evidencia central es una aplicación ejecutable cuyos cálculos y decisiones puedas **explicar y comprobar**. No hace falta producir documentos o capturas de pantalla para cada ejercicio.
+
+### Lista de verificación
+
+- [ ] Sé diferenciar funciones de cálculo y de presentación.
+- [ ] Utilicé parámetros nombrados y `required`.
+- [ ] Puedo distinguir `List`, `Set` y `Map` por su propósito.
+- [ ] No accedo a índices inexistentes ni a claves ausentes sin comprobar.
+- [ ] Entiendo cuándo dos variables comparten una colección.
+- [ ] Normalizo nombres para identificar duplicados.
+- [ ] Los registros se guardan únicamente después de una captura completa.
+- [ ] Utilicé `where`, `map`, `toList` y `fold`.
+- [ ] Puedo consultar por separado tres observaciones.
+- [ ] El listado de cultivos únicos no elimina registros originales.
+- [ ] Realicé los casos A–L, incluidos los errores y límites.
+- [ ] La versión final ya no contiene mensajes de función pendiente.
+
+### Preguntas para explicar tu solución
+
+1. ¿Por qué el mapa del catálogo está fuera del `while`?
+2. ¿Qué diferencias prácticas existen entre lista, conjunto y mapa?
+3. ¿Qué devuelve la búsqueda de una clave inexistente en un `Map`?
+4. ¿Por qué un nombre de cultivo puede aparecer en varias observaciones aunque no deba repetirse dentro de una?
+5. ¿Por qué se normalizan las claves en la función `createObservationKey`?
+6. ¿Cómo calculas un total con `fold` y cómo lo harías con `for-in`?
+7. ¿Qué diferencia hay entre `where` y el método `map`?
+8. ¿Por qué no se guarda un registro hasta terminar la captura?
+9. ¿Cómo conserva el programa el primer cultivo cuando existe empate?
+10. ¿Por qué tres observaciones pueden contener siete registros pero solo cinco nombres únicos?
+11. ¿Qué limitaciones tiene el mapa anidado frente a un modelo de clases?
+12. ¿Qué ocurriría con la información al cerrar el programa?
+
+### Criterios de finalización
+
+El laboratorio está completo si puedes **registrar, listar, buscar y consultar** varias observaciones; producir resultados correctos y mostrar nombres únicos; rechazar duplicados; explicar la elección de colecciones; y reproducir las pruebas obligatorias. Ejecutar una sola vez con datos correctos no es suficiente.
+
+## Continuidad — Laboratorio 04
+
+Ahora sabes organizar datos mediante funciones y colecciones. Sin embargo, un mapa anidado no representa explícitamente qué es un municipio, qué es un cultivo o qué reglas debe garantizar una observación. En el **Laboratorio 04** transformarás estas ideas en clases y objetos, con constructores, encapsulamiento y colaboración, sin perder las funcionalidades alcanzadas.
+
+## Referencias oficiales
+
+- [Dart — Funciones](https://dart.dev/language/functions)
+- [Dart — Colecciones](https://dart.dev/language/collections)
+- [Dart — Iterables](https://dart.dev/libraries/collections/iterables)
+- [Dart — Genéricos](https://dart.dev/language/generics)
+- [Dart — Null safety](https://dart.dev/null-safety)
+- [Dart — Biblioteca dart:core](https://api.dart.dev/dart-core/dart-core-library.html)
+- [Dart — dart format](https://dart.dev/tools/dart-format)
+- [Dart — dart analyze](https://dart.dev/tools/dart-analyze)
