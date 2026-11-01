@@ -1720,8 +1720,18 @@ dart run bin/agricultural_catalog_oop.dart
 
 El formateador y el analizador no sustituyen las pruebas de comportamiento y las verificaciones numéricas. Las pruebas automatizadas llegarán en el Laboratorio 05.
 
-### Ampliación opcional — Fuera de las 4,5 horas
+### Reto obligatorio — Sistema de alquiler de bicicletas
 
-Agrega una función que permita consultar cuántos cultivos comparten dos observaciones usando un `Set` construido a partir de los nombres de sus objetos. O incorpora un método público del catálogo que devuelva el número total de registros de cultivo, sin exponer su mapa interno.
+**Enunciado.** Un negocio de alquiler de bicicletas necesita una aplicación de consola para administrar sus bicicletas y los alquileres activos y finalizados. Cada bicicleta tiene un identificador, una descripción y una tarifa por hora. El sistema debe impedir que una bicicleta se alquile simultáneamente a dos personas.
 
-No añadas todavía `extends`, `implements`, serialización JSON ni archivos. Son temas de la siguiente etapa de aprendizaje.
+**Requisitos**
+
+- Modelar mediante clases los conceptos de bicicleta, alquiler y administración de alquileres, con constructores y responsabilidades diferenciadas.
+- Registrar bicicletas con identificadores únicos, descripciones no vacías y tarifas por hora positivas y finitas.
+- Permitir iniciar un alquiler indicando una bicicleta disponible y el nombre de la persona que la solicita.
+- Rechazar alquileres de bicicletas inexistentes, ya alquiladas o con datos inválidos, sin alterar el estado de los alquileres existentes.
+- Permitir finalizar un alquiler activo indicando una duración positiva y finita en horas; calcular el importe usando la tarifa de la bicicleta.
+- Impedir finalizar un alquiler inexistente o que ya haya finalizado.
+- Mostrar las bicicletas disponibles, los alquileres activos, los finalizados y el total de ingresos obtenidos por alquileres completados.
+- Proteger el estado y las colecciones internas: ninguna operación externa debe poder marcar una bicicleta como disponible ni agregar un alquiler finalizado sin pasar por las reglas del sistema.
+- Conservar la información en memoria y resolver el diseño mediante objetos, composición, encapsulamiento, getters y métodos; no utilizar herencia, interfaces ni JSON.
