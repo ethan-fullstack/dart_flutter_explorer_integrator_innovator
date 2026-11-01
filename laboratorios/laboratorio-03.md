@@ -74,6 +74,12 @@ Los ejemplos, identificadores, mensajes, comentarios y nombres de archivos está
 
 ---
 
+### Organización del trabajo en GitHub
+
+Desde este laboratorio, utiliza **un único repositorio individual y acumulativo** para toda la ruta. Guarda este proyecto en `lab-03/dart_lab_03/`; conserva `lab-01/` y las demás carpetas anteriores cuando existan. Ejecuta `dart create -t console dart_lab_03` desde `lab-03/`, y ejecuta `dart run`, `dart analyze` y las instrucciones de cada práctica desde la raíz de `dart_lab_03/`.
+
+La estructura anterior es la del **repositorio personal de desarrollo**, no la del repositorio que aloja las guías. Después de terminar, actualiza el README principal con el estado, las instrucciones de ejecución y los cambios de las versiones anteriores. Registra commits significativos, sin una cantidad mínima artificial. Cada laboratorio requiere también un **informe PDF obligatorio** como segunda evidencia; se prepara para la entrega, sin reducir las horas de programación.
+
 ## Práctica 3.1 — Funciones y responsabilidades (35 min)
 
 ### Objetivos
@@ -1363,7 +1369,71 @@ No avances todavía a clases, persistencia o APIs: esos temas tendrán laborator
 
 ## Entrega y autoevaluación
 
-Conserva `bin/agricultural_catalog.dart` como producto principal y los archivos de las cinco prácticas anteriores. La evidencia central es una aplicación ejecutable cuyos cálculos y decisiones puedas **explicar y comprobar**. No hace falta producir documentos o capturas de pantalla para cada ejercicio.
+La entrega de este laboratorio consta de **dos evidencias obligatorias**: un repositorio individual acumulativo en GitHub y un **informe PDF**. El código debe poder ejecutarse y verificarse; el PDF explica sus resultados y decisiones.
+
+### Evidencia 1 — GitHub
+
+- Utilizar el **mismo repositorio individual** desde el Laboratorio 01; conservar las carpetas de los laboratorios anteriores sin sobrescribir sus versiones.
+- Agregar la carpeta `lab-03/dart_lab_03/`, con el proyecto Dart, su configuración y los archivos de ejercicios desarrollados.
+- Incluir como producto principal bin/agricultural_catalog.dart y conservar los demás archivos correspondientes a las prácticas de este laboratorio.
+- Implementar y demostrar: Múltiples observaciones, `List`, `Set`, `Map`, mapas anidados, búsquedas, duplicados, totales y nombres únicos; pruebas A–L.
+- Registrar **commits significativos** que evidencien implementación, mejoras, depuración y correcciones reales, sin exigir un número fijo.
+- Actualizar el **README principal** con el estado y las instrucciones de ejecución de los laboratorios 01 al 03, así como las funcionalidades incorporadas.
+- Evitar subir credenciales, archivos temporales o resultados generados innecesarios.
+
+### Evidencia 2 — Informe PDF
+
+El documento debe incluir:
+
+1. Identificación de la persona que desarrolla, número del laboratorio y enlace al repositorio individual.
+2. Descripción de las nuevas funcionalidades de catálogo agrícola en memoria y de sus archivos principales.
+3. Decisiones técnicas justificadas: elección de colecciones, normalización, búsqueda y agregación.
+4. Resultados de las pruebas y verificaciones: casos probados, resultados esperados y observados, errores y correcciones.
+5. Seguimiento de GitHub y evolución del sistema: commits representativos y cambios progresivos. Explicar cómo la versión 03 conserva múltiples observaciones frente al único resumen de la 02.
+6. Respuestas argumentadas a las cinco situaciones de análisis siguientes.
+
+El PDF no necesita una extensión fija ni capturas de cada instrucción; **sí debe explicar y respaldar el trabajo con evidencias concretas** de código, resultados y commits. Su preparación es parte de la entrega posterior a la sesión práctica de 4,5 horas.
+
+### Preguntas de análisis
+
+Responde **estas cinco preguntas en el PDF**. En cada caso explica cómo identificarías el problema, qué cambio aplicarías con los conceptos del laboratorio y cómo verificarías que funciona.
+
+**1. ¿Qué harías si al recorrer cultivos aparece un error de índice fuera de rango?**
+
+Explica cómo revisar `length`, el índice inicial y la condición del ciclo.
+
+**2. ¿Qué harías si el catálogo muestra varias veces un mismo nombre de cultivo?**
+
+Justifica cuándo derivar un `Set` y por qué no debes eliminar los registros originales.
+
+**3. ¿Qué harías si una consulta intenta utilizar una observación inexistente?**
+
+Explica la búsqueda nullable en `Map` y cómo comprobar la ausencia antes del acceso.
+
+**4. ¿Qué harías si registrar otra vez un cultivo sobrescribe su superficie anterior?**
+
+Analiza claves, normalización y la validación de duplicados antes de asignar al mapa.
+
+**5. ¿Qué harías si los totales dejan de representar los datos por modificar una colección compartida?**
+
+Describe la diferencia entre compartir y copiar colecciones y una prueba que detecte el problema.
+
+### Preguntas de repaso (opcionales)
+
+Las siguientes preguntas originales sirven para estudiar; **no sustituyen** las cinco preguntas de análisis exigidas en el PDF.
+
+1. ¿Por qué el mapa del catálogo está fuera del `while`?
+2. ¿Qué diferencias prácticas existen entre lista, conjunto y mapa?
+3. ¿Qué devuelve la búsqueda de una clave inexistente en un `Map`?
+4. ¿Por qué un nombre de cultivo puede aparecer en varias observaciones aunque no deba repetirse dentro de una?
+5. ¿Por qué se normalizan las claves en la función `createObservationKey`?
+6. ¿Cómo calculas un total con `fold` y cómo lo harías con `for-in`?
+7. ¿Qué diferencia hay entre `where` y el método `map`?
+8. ¿Por qué no se guarda un registro hasta terminar la captura?
+9. ¿Cómo conserva el programa el primer cultivo cuando existe empate?
+10. ¿Por qué tres observaciones pueden contener siete registros pero solo cinco nombres únicos?
+11. ¿Qué limitaciones tiene el mapa anidado frente a un modelo de clases?
+12. ¿Qué ocurriría con la información al cerrar el programa?
 
 ### Lista de verificación
 
@@ -1380,24 +1450,13 @@ Conserva `bin/agricultural_catalog.dart` como producto principal y los archivos 
 - [ ] Realicé los casos A–L, incluidos los errores y límites.
 - [ ] La versión final ya no contiene mensajes de función pendiente.
 
-### Preguntas para explicar tu solución
-
-1. ¿Por qué el mapa del catálogo está fuera del `while`?
-2. ¿Qué diferencias prácticas existen entre lista, conjunto y mapa?
-3. ¿Qué devuelve la búsqueda de una clave inexistente en un `Map`?
-4. ¿Por qué un nombre de cultivo puede aparecer en varias observaciones aunque no deba repetirse dentro de una?
-5. ¿Por qué se normalizan las claves en la función `createObservationKey`?
-6. ¿Cómo calculas un total con `fold` y cómo lo harías con `for-in`?
-7. ¿Qué diferencia hay entre `where` y el método `map`?
-8. ¿Por qué no se guarda un registro hasta terminar la captura?
-9. ¿Cómo conserva el programa el primer cultivo cuando existe empate?
-10. ¿Por qué tres observaciones pueden contener siete registros pero solo cinco nombres únicos?
-11. ¿Qué limitaciones tiene el mapa anidado frente a un modelo de clases?
-12. ¿Qué ocurriría con la información al cerrar el programa?
-
 ### Criterios de finalización
 
 El laboratorio está completo si puedes **registrar, listar, buscar y consultar** varias observaciones; producir resultados correctos y mostrar nombres únicos; rechazar duplicados; explicar la elección de colecciones; y reproducir las pruebas obligatorias. Ejecutar una sola vez con datos correctos no es suficiente.
+
+### Condiciones de entrega
+
+**Adjunta el informe PDF y proporciona el enlace al repositorio individual de GitHub.** El repositorio debe permitir revisar las versiones acumuladas desde el Laboratorio 01, los commits y las instrucciones para ejecutar el proyecto actual. El informe debe justificar las decisiones técnicas, presentar resultados de verificación y analizar la evolución de la aplicación.
 
 ## Continuidad — Laboratorio 04
 
