@@ -537,7 +537,13 @@ class AreaCounter {
       return false;
     }
 
-    _totalArea += area;
+    double nextTotal = _totalArea + area;
+
+    if (!nextTotal.isFinite) {
+      return false;
+    }
+
+    _totalArea = nextTotal;
     return true;
   }
 }
@@ -554,9 +560,9 @@ void main() {
 - `_totalArea` es **privado a la biblioteca** que lo declara.
 - `totalArea` es un getter público de solo lectura.
 - `addArea` expresa una operación válida y rechaza valores no positivos o no finitos.
-- El método devuelve `bool` para informar si se aceptó el cambio.
+- El método devuelve `bool` para informar si se aceptó el cambio. Además, calcula el nuevo total **antes de asignarlo** para rechazar un posible desbordamiento a infinito.
 
-**Predice** los tres valores impresos. Luego llama a `addArea(0.0)`, `addArea(double.nan)` y `addArea(50.0)`. ¿Cuándo cambia el total?
+**Predice** los tres valores impresos. Luego llama a `addArea(0.0)`, `addArea(double.nan)` y `addArea(50.0)`. ¿Cuándo cambia el total? Prueba también sumar dos valores finitos muy grandes: el contador no debe acabar almacenando infinito.
 
 ### 3. Una precisión importante: privacidad por biblioteca
 
@@ -597,7 +603,13 @@ class AreaCounter {
       return false;
     }
 
-    _totalArea += area;
+    double nextTotal = _totalArea + area;
+
+    if (!nextTotal.isFinite) {
+      return false;
+    }
+
+    _totalArea = nextTotal;
     return true;
   }
 }
@@ -1076,6 +1088,8 @@ Este modelo incluye decisiones de dominio deliberadamente sencillas:
 - El total debe ser finito, incluso si los números individuales son finitos.
 - Ante un empate de áreas, `largestCrop` conserva el **primer cultivo**, porque la comparación usa `>` y no `>=`.
 
+El recorrido `crops.skip(1)` omite el primer elemento porque ya se utilizó para inicializar `largest`. Así se compara con los restantes y se conserva el primero en caso de empate.
+
 **No cambies estas reglas por categorías agrícolas externas sin evidencia.** El propósito es comprender constructores, composición e invariantes. En el Laboratorio 05 profundizarás en los tipos de excepción y en las pruebas automáticas.
 
 ### 7. Comprueba los datos originales
@@ -1264,6 +1278,8 @@ List<String> get uniqueCropNames {
 - `remove` pide al mapa que elimine una clave. Devuelve `false` si no existía.
 - `listRecords` crea una **lista nueva** y ordena esa lista, sin exponer el mapa privado.
 - `uniqueCropNames` **deriva** los nombres distintos a partir de las observaciones: no mantiene una colección secundaria que podría quedar desactualizada.
+
+`firstKey.compareTo(secondKey)` permite comparar dos textos para ordenarlos; `sort` utiliza el resultado de esa comparación para determinar el orden. El orden escogido aquí es alfabético por la clave normalizada.
 
 **Importante:** `List.unmodifiable` no duplica cada objeto `AgriculturalRecord`, pero este diseño utiliza registros con campos `final` y listas de cultivos protegidas. En el modelo de esta práctica, eso evita modificaciones directas de los registros consultados.
 
@@ -1759,7 +1775,7 @@ El laboratorio está completo cuando puedes ejecutar el catálogo orientado a ob
 
 Ahora conoces los fundamentos de POO y has construido un catálogo mediante composición de objetos. El siguiente paso será aprender cuándo utilizar **herencia, interfaces y polimorfismo**, cómo manejar excepciones de forma explícita, cómo distribuir clases entre bibliotecas, cómo **leer y escribir JSON** y cómo ejecutar **pruebas unitarias**.
 
-Continúa con el [Laboratorio 05 — POO avanzada, manejo de datos, JSON y pruebas](laboratorio-05.md). Allí usarás los mismos conceptos de `CropArea` y `AgriculturalRecord`, adaptados a una aplicación que procesa datos desde archivos.
+Continúa con el [Laboratorio 05 — POO avanzada, manejo de datos, JSON y pruebas](laboratorio-05.md). Allí usarás los mismos conceptos de `CropArea` y `AgriculturalRecord`, adaptados a una aplicación que procesa datos desde archivos. En este laboratorio utilizamos `ArgumentError` al recibir argumentos inválidos en el constructor; el siguiente también estudiará `FormatException` para representar problemas en el formato de datos externos. Las excepciones tienen propósitos distintos, aunque ambas permiten comunicar un fallo explícitamente.
 
 ## Referencias oficiales
 
