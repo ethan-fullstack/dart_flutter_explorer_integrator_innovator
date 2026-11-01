@@ -544,3 +544,444 @@ Parte de seis nombres con repeticiones, espacios y diferencias de mayúsculas. C
 
 ---
 
+## Práctica 3.4 — Mapas: claves, valores y registros anidados (45 min)
+
+### Objetivos
+
+Relacionar datos mediante claves, detectar claves repetidas, acceder a valores que pueden faltar y organizar datos relacionados sin crear clases todavía.
+
+### 1. Un mapa relaciona claves con valores
+
+En los ejemplos anteriores guardaste nombres en una lista y superficies en otra. Si el objetivo es relacionar cada nombre con su superficie, un `Map` puede resultar más claro.
+
+Crea `bin/practice_34.dart`:
+
+~~~dart
+void main() {
+  Map<String, double> cropAreas = {
+    'Coffee': 125.0,
+    'Plantain': 75.0,
+    'Avocado': 50.0,
+  };
+
+  print(cropAreas);
+  print(cropAreas.length);
+  print(cropAreas['Coffee']);
+}
+~~~
+
+`Map<String, double>` indica que las **claves** son cadenas de texto y los **valores** son números decimales. Una clave identifica como máximo **un valor** en un mapa.
+
+**Antes de ejecutar:** predice lo que devuelve la consulta `cropAreas['Coffee']`.
+
+### 2. ¿Qué ocurre con una clave inexistente?
+
+~~~dart
+void main() {
+  Map<String, double> cropAreas = {'Coffee': 125.0};
+
+  double? existingArea = cropAreas['Coffee'];
+  double? missingArea = cropAreas['Rice'];
+
+  print(existingArea);
+  print(missingArea);
+}
+~~~
+
+Aunque el mapa almacene `double`, buscar una clave devuelve **`double?`**: si no existe, el resultado es `null`.
+
+Hay dos formas sencillas de responder a esa posibilidad:
+
+~~~dart
+void main() {
+  Map<String, double> cropAreas = {'Coffee': 125.0};
+
+  double areaOrZero = cropAreas['Rice'] ?? 0.0;
+  print(areaOrZero);
+
+  double? coffeeArea = cropAreas['Coffee'];
+
+  if (coffeeArea != null) {
+    print('Coffee area: $coffeeArea');
+  }
+}
+~~~
+
+`??` establece un valor predeterminado. **No lo uses para ocultar errores:** devolver cero tiene sentido solo si esa regla corresponde a tu problema.
+
+**Ejercicio:** muestra un mensaje diferente si un cultivo existe y si no existe, sin usar el operador de afirmación `!`.
+
+### 3. Agregar, actualizar y eliminar
+
+~~~dart
+void main() {
+  Map<String, double> cropAreas = {'Coffee': 125.0};
+
+  cropAreas['Beans'] = 40.0;
+  cropAreas['Coffee'] = 130.0;
+
+  print(cropAreas);
+
+  cropAreas.remove('Beans');
+  print(cropAreas);
+}
+~~~
+
+La asignación a una clave nueva agrega una entrada; asignar a una clave existente **reemplaza su valor anterior**.
+
+**Ejercicio:** inicia un mapa con `'Cocoa': 20.0` y agrega otra asignación a `'Cocoa'` con `35.0`. ¿Cuántas entradas quedan? ¿Qué área conserva? Esto explica por qué el registro final debe verificar duplicados antes de almacenar.
+
+### 4. Recorrer claves, valores y entradas
+
+~~~dart
+void main() {
+  Map<String, double> cropAreas = {
+    'Coffee': 125.0,
+    'Beans': 40.0,
+  };
+
+  for (final name in cropAreas.keys) {
+    print('Crop: $name');
+  }
+
+  for (final area in cropAreas.values) {
+    print('Area: $area');
+  }
+
+  for (final entry in cropAreas.entries) {
+    String crop = entry.key;
+    double area = entry.value;
+    print('$crop: $area ha');
+  }
+}
+~~~
+
+`entries` permite recorrer juntos nombre y superficie. Cada entrada tiene `key` y `value`.
+
+**Ejercicio:** calcula el total usando `cropAreas.values` y un ciclo `for-in`. Después muestra cada par de nombre y superficie sin crear listas paralelas.
+
+### 5. Contar y acumular por clave
+
+Un mapa también permite acumular información agrupada:
+
+~~~dart
+void main() {
+  List<String> cropNames = ['Coffee', 'Beans', 'Coffee', 'Rice', 'Beans'];
+
+  Map<String, int> appearances = <String, int>{};
+
+  for (final name in cropNames) {
+    int previousCount = appearances[name] ?? 0;
+    appearances[name] = previousCount + 1;
+  }
+
+  print(appearances);
+}
+~~~
+
+**Predice:** ¿cuántas apariciones tiene `Coffee` y cuántas `Rice`? ¿Por qué aquí es correcto reemplazar el valor de una clave, mientras que en el mapa de superficies del apartado anterior podría significar pérdida de un dato?
+
+### 6. Mapas anidados: varios registros
+
+Para conservar más de una observación sin crear clases, puedes usar **un mapa cuyos valores sean también mapas**:
+
+~~~dart
+void main() {
+  Map<String, Map<String, double>> observations = {
+    'Andes (2025)': {
+      'Coffee': 125.0,
+      'Plantain': 75.0,
+    },
+    'Andes (2024)': {
+      'Coffee': 110.0,
+      'Beans': 40.0,
+    },
+  };
+
+  print(observations.keys);
+  print(observations['Andes (2025)']);
+}
+~~~
+
+El mapa **externo** relaciona un identificador legible de observación con los cultivos registrados. El mapa **interno** relaciona cada cultivo con su superficie.
+
+Este diseño tiene una limitación deliberada: almacena el municipio y el año juntos en una **clave de texto**. Más adelante, con programación orientada a objetos, podrás diseñar modelos con campos separados y reglas más explícitas. Por ahora nos permite practicar colecciones sin introducir conceptos nuevos antes de tiempo.
+
+### 7. Consultar una observación inexistente
+
+~~~dart
+void main() {
+  Map<String, Map<String, double>> observations = {
+    'Andes (2025)': {'Coffee': 125.0},
+  };
+
+  Map<String, double>? selected = observations['Unknown (2025)'];
+
+  if (selected == null) {
+    print('Observation not found.');
+  } else {
+    print(selected);
+  }
+}
+~~~
+
+La consulta al mapa externo devuelve `Map<String, double>?`. No intentes utilizar directamente `selected.length` antes de verificar que `selected` no sea nulo.
+
+### 8. Copia superficial en mapas anidados
+
+~~~dart
+void main() {
+  Map<String, Map<String, double>> original = {
+    'Andes (2025)': {'Coffee': 125.0},
+  };
+
+  Map<String, Map<String, double>> shallowCopy = Map.of(original);
+
+  Map<String, double>? sharedInnerMap = shallowCopy['Andes (2025)'];
+
+  if (sharedInnerMap != null) {
+    sharedInnerMap['Coffee'] = 150.0;
+  }
+
+  print(original);
+}
+~~~
+
+Aunque `shallowCopy` sea otro mapa externo, **ambos mapas siguen compartiendo el mapa interno**. Para guardar una observación de manera independiente, en nuestro reto utilizaremos:
+
+~~~dart
+void main() {
+  Map<String, double> inputCrops = {'Coffee': 125.0};
+  Map<String, double> savedCrops = Map<String, double>.from(inputCrops);
+
+  inputCrops['Coffee'] = 200.0;
+
+  print(savedCrops['Coffee']);
+}
+~~~
+
+La copia es suficiente en este caso porque los valores internos son `double`, no otros objetos mutables.
+
+### Depuración — Sobrescribir sin querer
+
+~~~dart
+void main() {
+  Map<String, double> crops = {'Coffee': 125.0};
+
+  crops['Coffee'] = 75.0;
+
+  print(crops);
+}
+~~~
+
+Si esas dos superficies representaban **dos registros distintos**, se perdió la primera. Explica cuál es la limitación de utilizar solo el nombre como clave y qué información adicional sería necesaria para distinguir registros entre municipios y años.
+
+### Reto — Consulta de observaciones
+
+Construye un `Map<String, Map<String, double>>` con **tres observaciones**, al menos dos cultivos por observación y dos años diferentes. Muestra:
+
+- Los identificadores disponibles.
+- Cuántos cultivos tiene cada observación.
+- La superficie total de cada observación.
+- Un mensaje comprensible al solicitar un identificador inexistente.
+
+**Comprobación:** añade una nueva observación y confirma que el total de observaciones aumenta, pero los registros existentes conservan sus superficies.
+
+### Comprobación
+
+¿Qué diferencia hay entre clave y valor? ¿Por qué consultar una clave produce un valor nullable? ¿Qué ocurre cuando escribes dos veces la misma clave? ¿Qué parte del mapa anidado representa una observación y cuál representa sus cultivos?
+
+---
+
+## Práctica 3.5 — Filtrar, transformar y resumir colecciones (35 min)
+
+### Objetivos
+
+Comparar ciclos explícitos con operaciones sobre `Iterable` y aprender a identificar cuándo se produce una lista nueva y cuándo se modifica la colección original.
+
+### 1. Primero resolver con `for`
+
+Crea `bin/practice_35.dart`:
+
+~~~dart
+void main() {
+  List<double> areas = [10.0, 50.0, 5.0, 80.0];
+  List<double> selectedAreas = <double>[];
+
+  for (final area in areas) {
+    if (area >= 20.0) {
+      selectedAreas.add(area);
+    }
+  }
+
+  print(selectedAreas);
+}
+~~~
+
+**Predice:** ¿cuáles valores superan el umbral elegido? El límite `20.0` es solo un criterio de práctica.
+
+### 2. Resolver con `where`
+
+~~~dart
+void main() {
+  List<double> areas = [10.0, 50.0, 5.0, 80.0];
+
+  List<double> selectedAreas = areas
+      .where((area) => area >= 20.0)
+      .toList();
+
+  print(selectedAreas);
+}
+~~~
+
+`where` **filtra** elementos que cumplen una condición. `toList()` materializa el resultado como lista. La función anónima `(area) => area >= 20.0` se ejecuta para cada elemento cuando se recorre el resultado.
+
+**Ejercicio:** cambia el criterio a `area > 50.0`. Compara el resultado con el de un ciclo `for` y explica por qué `50.0` queda excluido.
+
+### 3. Transformar valores con `map`
+
+~~~dart
+void main() {
+  List<String> crops = [' coffee ', ' BEANS', 'Cocoa '];
+
+  List<String> normalized = crops
+      .map((name) => name.trim().toLowerCase())
+      .toList();
+
+  print(normalized);
+  print(crops);
+}
+~~~
+
+`map` **transforma** cada elemento. No debe confundirse con la colección `Map<K, V>`, que almacena pares clave–valor: aquí `map(...)` es un método de los iterables.
+
+**Ejercicio:** produce una lista nueva con todos los nombres en mayúsculas y comprueba que la lista original no cambió.
+
+### 4. Filtrar y transformar en una secuencia
+
+~~~dart
+void main() {
+  List<String> names = ['Coffee', '', ' Beans ', 'Rice'];
+
+  List<String> cleanedNames = names
+      .map((name) => name.trim())
+      .where((name) => name.isNotEmpty)
+      .toList();
+
+  print(cleanedNames);
+}
+~~~
+
+Primero se eliminan espacios; luego se descartan cadenas vacías.
+
+**Pregunta de análisis:** ¿qué ocurriría si aplicaras `where((name) => name.isNotEmpty)` **antes** de `trim()` a una cadena formada solo por espacios?
+
+### 5. Resumir con `fold`
+
+Primero resuelve con un acumulador:
+
+~~~dart
+void main() {
+  List<double> areas = [125.0, 75.0, 50.0];
+  double total = 0.0;
+
+  for (final area in areas) {
+    total += area;
+  }
+
+  print(total);
+}
+~~~
+
+Después compara con:
+
+~~~dart
+void main() {
+  List<double> areas = [125.0, 75.0, 50.0];
+
+  double total = areas.fold<double>(
+    0.0,
+    (sum, area) => sum + area,
+  );
+
+  print(total);
+}
+~~~
+
+`fold` empieza con un acumulador inicial (`0.0`) y combina cada elemento con el acumulado. A diferencia de otras estrategias, **una lista vacía produce el valor inicial**: en este caso `0.0`.
+
+**Ejercicio:** calcula la suma de `[12.5, 7.5, 5.0]` mediante ambos métodos y confirma que coinciden.
+
+### 6. Ordenar sin cambiar el original
+
+~~~dart
+void main() {
+  List<String> original = ['Rice', 'Coffee', 'Beans'];
+
+  List<String> sorted = List<String>.from(original);
+  sorted.sort();
+
+  print('Original: $original');
+  print('Sorted: $sorted');
+}
+~~~
+
+`sort()` cambia la lista sobre la que se invoca. Por eso creamos una copia para conservar el orden original.
+
+### 7. Trabajar con claves de un `Map`
+
+~~~dart
+void main() {
+  Map<String, double> cropAreas = {
+    'Coffee': 125.0,
+    'Beans': 15.0,
+    'Rice': 80.0,
+  };
+
+  List<String> largeCrops = cropAreas.entries
+      .where((entry) => entry.value >= 50.0)
+      .map((entry) => entry.key)
+      .toList();
+
+  largeCrops.sort();
+  print(largeCrops);
+}
+~~~
+
+`entries` permite consultar juntos las claves y los valores. `where` filtra por área; `map` convierte cada entrada seleccionada en su nombre de cultivo. `sort()` ordena los nombres.
+
+### 8. Comparar legibilidad antes de elegir
+
+Si un `for` explícito se entiende mejor, úsalo. Las transformaciones encadenadas son útiles cuando expresan con claridad **filtrar → transformar → materializar**, pero no deben ocultar reglas de negocio ni cálculos complejos.
+
+**Depuración — No es una lista todavía**
+
+~~~dart
+void main() {
+  List<int> numbers = [1, 2, 3, 4];
+
+  Iterable<int> evenNumbers = numbers.where((number) => number.isEven);
+
+  // Observe the difference between an Iterable and a List.
+  print(evenNumbers);
+  print(evenNumbers.toList());
+}
+~~~
+
+Este ejemplo **no contiene un error de compilación**. La pregunta es conceptual: ¿qué tipo devuelve `where`? ¿Por qué suele ser útil llamar a `toList()` al conservar un resultado para mostrarlo o modificarlo después?
+
+### Reto — Informe filtrado
+
+Partiendo de un mapa de cuatro cultivos y sus áreas, genera:
+
+1. Una lista ordenada de nombres con área mayor o igual a `50.0`.
+2. La suma de todas las áreas usando `fold` sobre `values`.
+3. Un conjunto de nombres normalizados, utilizando `map` y `toSet`.
+4. Una comparación del total obtenido mediante `fold` y mediante un ciclo.
+
+### Comprobación
+
+¿Qué diferencia hay entre `where` y `map`? ¿Qué produce `toList()`? ¿Por qué `sort()` puede alterar datos originales si no haces una copia? ¿Cuándo es preferible un ciclo explícito?
+
+---
+
