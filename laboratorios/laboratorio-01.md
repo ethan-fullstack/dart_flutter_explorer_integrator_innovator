@@ -16,8 +16,6 @@ Los municipios, cultivos y superficies utilizados en los ejemplos son datos fict
 | 1.6 | Reto integrador: ficha de observación agrícola | 80 min |
 | **Total** | | **270 min (4,5 h)** |
 
-### Objetivos
-
 - Diferenciar un algoritmo sencillo de su implementación como programa.
 - Crear y ejecutar archivos `.dart` y localizar la función `main()`.
 - Declarar, leer y modificar variables con tipos apropiados.
@@ -167,7 +165,7 @@ En cada caso responde: ¿el mensaje indica un problema de sintaxis o un nombre q
 
 ### Alternativa temporal sin instalación
 
-Si aún no puedes utilizar la terminal, puedes ejecutar los **ejemplos sin entrada de teclado** en [DartPad](https://dartpad.dev/). DartPad es útil para practicar `print`, variables y funciones, pero **no permite ejecutar los ejercicios que dependen de `dart:io` y `stdin.readLineSync()`** como si fueran programas de consola local. Para la práctica 1.4 y el reto final, utiliza el SDK local o las variantes de datos fijos indicadas más adelante.
+Si aún no puedes utilizar la terminal, puedes ejecutar los **ejemplos sin entrada de teclado** en [DartPad](https://dartpad.dev/). DartPad es útil en este ejercicio `print`, variables y funciones, pero **no permite ejecutar los ejercicios que dependen de `dart:io` y `stdin.readLineSync()`** como si fueran programas de consola local. Para la práctica 1.4 y el reto final, utiliza el SDK local o las variantes de datos fijos indicadas más adelante.
 
 ### Comprobación
 
