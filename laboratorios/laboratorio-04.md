@@ -1336,3 +1336,440 @@ Implementa en `main()` un catálogo con tres observaciones; agrega dos veces la 
 
 ---
 
+## Práctica 4.6 — Reto integrador: AgroDiversa orientada a objetos (70 min)
+
+### El problema que resolverás
+
+El catálogo del Laboratorio 03 ya podía registrar, listar y consultar observaciones, pero su información se representaba mediante **mapas anidados**. Ahora debes construir una nueva versión que conserve esas funcionalidades y use los objetos diseñados en las prácticas anteriores.
+
+La mejora fundamental **no es agregar muchas opciones**, sino organizar el problema en tres responsabilidades:
+
+1. `CropArea`: representa un nombre de cultivo y una superficie.
+2. `AgriculturalRecord`: representa una observación de municipio y año que contiene varios `CropArea` y calcula sus estadísticas.
+3. `ObservationCatalog`: conserva varias observaciones y permite agregarlas, encontrarlas, listarlas y eliminarlas.
+
+El menú y la lectura de teclado se quedarán fuera de las clases de dominio. Así podrás comprobar su comportamiento utilizando objetos creados directamente, incluso antes de completar la interacción por consola.
+
+### Requisitos funcionales
+
+Tu aplicación debe:
+
+- Mantener un catálogo de **múltiples observaciones** mientras el programa siga abierto.
+- Permitir registrar un municipio y un año entre `2000` y `2100`.
+- Permitir registrar entre `1` y `5` cultivos, cada uno con nombre no vacío y superficie positiva y finita.
+- Identificar observaciones por municipio y año sin distinguir espacios exteriores ni mayúsculas.
+- Rechazar un registro nuevo si ya existe otro con la misma clave, sin sobrescribirlo.
+- Rechazar nombres repetidos de cultivos dentro de una observación, ignorando mayúsculas y espacios exteriores.
+- Listar las observaciones ordenadas por municipio y año, de acuerdo con la clave normalizada.
+- Consultar una observación y mostrar sus cultivos, área total, área promedio, cultivo mayor y participación del mayor.
+- Mostrar el catálogo de nombres de cultivos distintos entre todas las observaciones.
+- Eliminar una observación cuando exista y comunicar cuando no exista.
+- Permitir salir mediante una opción del menú o al terminar la entrada estándar.
+- Conservar separados los objetos de dominio y el código que lee y muestra información por terminal.
+
+**Sin persistencia todavía:** cerrar el programa elimina los registros de esta sesión. Guardar archivos y trabajar con JSON se enseñará en el Laboratorio 05.
+
+### Menú previsto
+
+~~~text
+================================
+       AGRODIVERSA OOP
+================================
+1. Register observation
+2. List observations
+3. View observation
+4. Show unique crops
+5. Remove observation
+0. Exit
+Option:
+~~~
+
+### Datos ficticios para verificar
+
+Utiliza posteriormente estas observaciones:
+
+| Municipio | Año | Cultivos y superficies |
+|---|---:|---|
+| Andes | 2025 | Coffee: 125 ha; Plantain: 75 ha; Avocado: 50 ha |
+| Andes | 2024 | Coffee: 110 ha; Beans: 40 ha |
+| La Mesa | 2025 | Cocoa: 20 ha; Plantain: 30 ha |
+
+Los resultados matemáticos esperados son:
+
+| Observación | Total | Promedio | Mayor cultivo | Participación del mayor |
+|---|---:|---:|---|---:|
+| Andes, 2025 | 250.00 ha | 83.33 ha | Coffee, 125.00 ha | 50.00% |
+| Andes, 2024 | 150.00 ha | 75.00 ha | Coffee, 110.00 ha | 73.33% |
+| La Mesa, 2025 | 50.00 ha | 25.00 ha | Plantain, 30.00 ha | 60.00% |
+
+El **conjunto de nombres únicos** de los tres registros contiene cinco elementos: `avocado`, `beans`, `cocoa`, `coffee` y `plantain`. Hay **tres observaciones** y **siete registros individuales de cultivo**; estas tres cifras no significan lo mismo.
+
+### Etapa 1 — Preparar las clases sin duplicarlas (10 min)
+
+Crea `bin/agricultural_catalog_oop.dart`. Escribe al principio:
+
+~~~dart
+import 'dart:io';
+~~~
+
+Copia, **sin incluir los `main()` de las prácticas**, estas implementaciones:
+
+- `CropArea` del apartado 4.4.6, con nombre normalizado mediante `trim()`, área positiva y finita, y atributos `final`.
+- `AgriculturalRecord` del apartado 4.4.6, con `municipality`, `year`, `crops`, `totalArea`, `averageArea`, `largestCrop` y `largestShare`.
+- `ObservationCatalog` de la práctica 4.5, con `add`, `find`, `remove`, `listRecords`, `uniqueCropNames` y `count`.
+
+El archivo final tendrá **una sola declaración de cada clase y un solo `main()`**. No crees una copia adicional de `CropArea` para cada opción del menú.
+
+Al inicio, comprueba manualmente en `main()` que puedes crear un catálogo, agregar una observación y consultar su total **sin solicitar ningún dato por teclado**. Esa verificación te permite separar problemas del modelo de problemas de la consola.
+
+### Etapa 2 — Incorporar las funciones de lectura (10 min)
+
+Desde `dart_lab_02/bin/practice_25.dart` copia **las implementaciones completas**, antes de `main()`, de:
+
+~~~text
+String? readRequiredText(String prompt)
+int? readIntInRange(String prompt, int minimum, int maximum)
+double? readPositiveArea(String prompt)
+~~~
+
+Estas líneas representan **firmas de referencia**, no instrucciones Dart independientes. Debes copiar las funciones con sus cuerpos, no dejarlas como declaraciones sin implementación.
+
+Recuerda sus responsabilidades:
+
+- `readRequiredText` repite la solicitud mientras el texto esté vacío.
+- `readIntInRange` utiliza `int.tryParse` y comprueba límites.
+- `readPositiveArea` utiliza `double.tryParse`, `isFinite` y la condición positiva.
+- Todas devuelven `null` si finaliza la entrada estándar, para permitir que el programa termine.
+
+**Ejercicio de comprobación:** antes de continuar, ejecuta un `main()` temporal que lea un municipio, una cantidad entre uno y cinco y un área positiva. Escribe primero entradas erróneas, después válidas. Restaura `main()` para seguir.
+
+### Etapa 3 — Crear y registrar una observación (15 min)
+
+Crea una función que utilice el catálogo **recibido por parámetro**, sin depender de variables globales:
+
+~~~dart
+bool registerObservation(ObservationCatalog catalog) {
+  // TODO: Read municipality, year, and crop count.
+  // TODO: Create and validate CropArea objects.
+  // TODO: Build an AgriculturalRecord.
+  // TODO: Add it to the catalog and report the result.
+  // Return false if standard input ends; true otherwise.
+  throw UnimplementedError();
+}
+~~~
+
+`UnimplementedError()` indica intencionalmente que **todavía no has escrito la función**. Debes reemplazarlo y eliminar los mensajes pendientes en la versión final.
+
+Orden recomendado:
+
+1. Lee el municipio con `readRequiredText('Municipality: ')`.
+2. Lee el año con `readIntInRange('Year (2000-2100): ', 2000, 2100)`.
+3. Si una lectura devuelve `null`, devuelve `false`.
+4. Antes de pedir cultivos, comprueba `catalog.find(municipality, year) != null`. Si existe, muestra `'Observation already exists.'` y devuelve `true` sin cambiar datos.
+5. Lee la cantidad de cultivos entre `1` y `5`.
+6. Crea la lista local `List<CropArea> currentCrops = <CropArea>[];` y un conjunto `Set<String> usedNames = <String>{};`.
+7. Utiliza un ciclo `for` para leer cada nombre y superficie, crear un `CropArea` y agregarlo a la lista.
+8. Rechaza nombres duplicados **antes** de agregarlos. Para reconocerlos normaliza el texto con `trim().toLowerCase()`.
+9. **Solo después de terminar toda la lectura**, crea `AgriculturalRecord` y llama `catalog.add(record)`.
+10. Muestra si el registro se agregó y retorna `true`.
+
+Para el punto 8, puedes crear un lector separado que aproveche `readRequiredText`:
+
+~~~dart
+String? readUniqueCropName(
+  String prompt,
+  Set<String> usedNames,
+) {
+  while (true) {
+    String? rawName = readRequiredText(prompt);
+
+    if (rawName == null) {
+      return null;
+    }
+
+    String normalizedName = rawName.trim().toLowerCase();
+
+    if (!usedNames.add(normalizedName)) {
+      print('Crop already registered in this observation.');
+      continue;
+    }
+
+    return rawName.trim();
+  }
+}
+~~~
+
+**Detalle importante:** la función agrega el nombre al conjunto antes de leer su área. Si finaliza la entrada justo después del nombre, el programa terminará sin guardar el registro. Eso es correcto porque el conjunto y la lista son **locales a la operación** y el catálogo aún no ha sido modificado.
+
+Dentro de `registerObservation`, el ciclo tendrá esta forma:
+
+~~~dart
+for (int index = 1; index <= cropCount; index++) {
+  String? cropName = readUniqueCropName(
+    'Crop $index name: ',
+    usedNames,
+  );
+
+  if (cropName == null) {
+    return false;
+  }
+
+  double? area = readPositiveArea('Crop $index area (ha): ');
+
+  if (area == null) {
+    return false;
+  }
+
+  currentCrops.add(
+    CropArea(name: cropName, plantedArea: area),
+  );
+}
+~~~
+
+Este fragmento se coloca **después** de declarar `cropCount`, `currentCrops` y `usedNames`. Recuerda validar las lecturas antes de utilizar sus resultados.
+
+En el programa final, las reglas de los constructores son una **segunda frontera** de validación que protege los objetos aunque se creen desde otro programa. Más adelante aprenderás a tratar excepciones explícitamente. **Aquí se comprueban las entradas comunes antes de crear los objetos**.
+
+### Etapa 4 — Listar y consultar objetos (15 min)
+
+Crea `void listObservations(ObservationCatalog catalog)`. Debe:
+
+- Obtener `catalog.listRecords()`.
+- Mostrar `'No observations registered.'` si está vacía.
+- Recorrer los objetos y mostrar municipio, año y cantidad de cultivos.
+- Utilizar exclusivamente propiedades públicas, sin leer el mapa privado.
+
+Pista:
+
+~~~dart
+void listObservations(ObservationCatalog catalog) {
+  List<AgriculturalRecord> records = catalog.listRecords();
+
+  if (records.isEmpty) {
+    print('No observations registered.');
+    return;
+  }
+
+  for (final record in records) {
+    print(
+      record.municipality +
+          ' (' +
+          record.year.toString() +
+          '): ' +
+          record.crops.length.toString() +
+          ' crops',
+    );
+  }
+}
+~~~
+
+Luego crea `void showObservation(AgriculturalRecord record)`, que muestra las estadísticas desde **los getters del objeto**, sin recalcular sumas en la consola:
+
+~~~dart
+void showObservation(AgriculturalRecord record) {
+  print('Municipality: ' + record.municipality);
+  print('Year: ' + record.year.toString());
+
+  for (final crop in record.crops) {
+    print(
+      crop.name + ': ' + crop.plantedArea.toStringAsFixed(2) + ' ha',
+    );
+  }
+
+  print('Crops processed: ' + record.crops.length.toString());
+  print('Total area: ' + record.totalArea.toStringAsFixed(2) + ' ha');
+  print('Average area: ' + record.averageArea.toStringAsFixed(2) + ' ha');
+  print('Largest crop: ' + record.largestCrop.name);
+  print(
+    'Largest share: ' + record.largestShare.toStringAsFixed(2) + '%',
+  );
+}
+~~~
+
+Para la opción de búsqueda, escribe `bool viewObservation(ObservationCatalog catalog)`. Su secuencia es:
+
+1. Leer municipio y año; devolver `false` ante fin de entrada.
+2. Consultar `catalog.find(municipality, year)`.
+3. Si el resultado es `null`, informar `'Observation not found.'`.
+4. Si existe, llamar a `showObservation(record)`.
+5. Devolver `true` al finalizar normalmente.
+
+**Prueba intermedia:** crea un catálogo en memoria con dos observaciones y comprueba que `listObservations` y `showObservation` presenten valores diferentes para cada una.
+
+### Etapa 5 — Menú persistente, cultivos únicos y eliminación (10 min)
+
+Utiliza un `main()` que cree el catálogo **una sola vez** y lo entregue a las funciones:
+
+~~~dart
+void main() {
+  ObservationCatalog catalog = ObservationCatalog();
+
+  while (true) {
+    print('1. Register observation');
+    print('2. List observations');
+    print('3. View observation');
+    print('4. Show unique crops');
+    print('5. Remove observation');
+    print('0. Exit');
+
+    int? option = readIntInRange('Option: ', 0, 5);
+
+    if (option == null || option == 0) {
+      print('Goodbye!');
+      return;
+    }
+
+    switch (option) {
+      case 1:
+        if (!registerObservation(catalog)) {
+          return;
+        }
+      case 2:
+        listObservations(catalog);
+      case 3:
+        if (!viewObservation(catalog)) {
+          return;
+        }
+      case 4:
+        for (final name in catalog.uniqueCropNames) {
+          print(name);
+        }
+      case 5:
+        if (!removeObservation(catalog)) {
+          return;
+        }
+      default:
+        print('Unknown option.');
+    }
+  }
+}
+~~~
+
+**Este `main()` es un esqueleto integrador**: funciona cuando ya implementaste las funciones mencionadas. En Dart 3 los casos de `switch` de instrucciones **no necesitan `break` al final**.
+
+Implementa `bool removeObservation(ObservationCatalog catalog)` siguiendo los pasos:
+
+1. Leer municipio y año con los lectores existentes.
+2. Devolver `false` si termina la entrada.
+3. Llamar a `catalog.remove(municipality, year)`.
+4. Mostrar `'Observation removed.'` si devolvió `true`, o `'Observation not found.'` si devolvió `false`.
+5. Devolver `true` para regresar al menú.
+
+En la opción 4, si el catálogo está vacío, muestra `'No crops available.'`. Después de agregar o eliminar registros, el resultado debe actualizarse automáticamente porque `uniqueCropNames` se calcula a partir de las observaciones existentes.
+
+### Etapa 6 — Verificación final (10 min)
+
+Ejecuta estos escenarios. Utiliza los datos ficticios de las tablas anteriores:
+
+| Caso | Acciones | Resultado esperado |
+|---|---|---|
+| A — Vacío | Listar, consultar, mostrar nombres y eliminar antes de registrar | Mensajes de ausencia; sin fallos |
+| B — Tres cultivos | Andes 2025: 125, 75, 50 | Total 250.00; promedio 83.33; mayor Coffee 125.00, participación 50.00% |
+| C — Otro año | Andes 2024: Coffee 110, Beans 40 | Ambas observaciones se conservan |
+| D — Otro municipio | La Mesa 2025: Cocoa 20, Plantain 30 | Tercera observación independiente; total 50.00 |
+| E — Clave duplicada | Intentar ` ANDES `, 2025 tras B | No se sobrescribe la primera observación |
+| F — Cultivo duplicado | Introducir Coffee y luego ` coffee ` en la misma captura | Repite el nombre; no agrega duplicado |
+| G — Nombres únicos | Registrar B, C y D y consultar opción 4 | Cinco nombres distintos ordenados |
+| H — Empate | Cultivos Coffee 20, Beans 20, Rice 10 | El primero sigue siendo el mayor; su participación es 40.00% |
+| I — Un solo cultivo | Área 12.5 | Total y promedio 12.50; participación 100.00% |
+| J — Datos inválidos | Año `abc`, cantidad `0`, áreas `-3`, `NaN` y `Infinity` | Rechaza los valores y permite reintentar |
+| K — Eliminación | Eliminar Andes 2024 dos veces | Primera vez verdadero; segunda vez informa que no existe |
+| L — Fin de entrada | Finalizar entrada durante la captura | Termina sin agregar un registro parcial ni entrar en ciclo infinito |
+| M — Copia protegida | Modificar la lista original pasada a un `AgriculturalRecord` | No cambia `record.crops` |
+| N — Independencia | Crear dos catálogos y agregar una observación a uno solo | El otro catálogo continúa vacío |
+
+**Diferencia frente al Laboratorio 03:** ya no consultas directamente `Map<String, Map<String, double>>` desde el menú. Trabajas con los métodos públicos del catálogo y con objetos `AgriculturalRecord`.
+
+### Ejercicio de depuración final
+
+En una copia temporal, introduce y corrige **uno a la vez** estos defectos:
+
+1. Crear `ObservationCatalog()` dentro del ciclo del menú. ¿Por qué desaparecen los datos?
+2. Permitir la asignación directa a `catalog._records` desde otra biblioteca. ¿Qué protege el límite de biblioteca?
+3. Guardar la lista recibida en el registro sin hacer una copia no modificable. ¿Cómo puede cambiar su contenido desde fuera?
+4. Sustituir `>` por `>=` al calcular el mayor. ¿Qué ocurre ante empates?
+5. Calcular el total de todas las observaciones en `showObservation` en lugar del total del objeto consultado. ¿Por qué cambia el significado del porcentaje?
+
+**Precisión sobre la privacidad:** la comprobación del punto 2 debe realizarse desde **otro archivo/biblioteca**, como se explicó en la práctica 4.3; en el mismo archivo el guion bajo no impide el acceso.
+
+### Validación del proyecto
+
+Con los errores intencionales corregidos, desde la raíz del proyecto ejecuta:
+
+~~~bash
+dart format bin
+dart analyze
+dart run bin/agricultural_catalog_oop.dart
+~~~
+
+El formateador y el analizador no sustituyen las pruebas de comportamiento y las verificaciones numéricas. Las pruebas automatizadas llegarán en el Laboratorio 05.
+
+### Ampliación opcional — Fuera de las 4,5 horas
+
+Agrega una función que permita consultar cuántos cultivos comparten dos observaciones usando un `Set` construido a partir de los nombres de sus objetos. O incorpora un método público del catálogo que devuelva el número total de registros de cultivo, sin exponer su mapa interno.
+
+No añadas todavía `extends`, `implements`, serialización JSON ni archivos. Son temas de la siguiente etapa de aprendizaje.
+
+---
+
+## Entrega y autoevaluación
+
+El archivo principal es `bin/agricultural_catalog_oop.dart`. Conserva también los ejemplos de las prácticas `practice_41.dart` a `practice_45.dart` y las correcciones de tus ejercicios.
+
+No necesitas preparar un informe extenso ni una colección de capturas para demostrar cada concepto. El resultado principal es un programa ejecutable, comprensible y comprobado.
+
+### Lista de comprobación
+
+- [ ] Puedo distinguir clase, objeto, instancia, atributo, método y constructor.
+- [ ] Sé crear dos objetos de la misma clase y demostrar que conservan estados independientes.
+- [ ] Utilicé parámetros nombrados y `required`.
+- [ ] Comprendo para qué sirven `this`, `final` y los getters.
+- [ ] Diferencio un atributo privado de uno público y entiendo la privacidad por biblioteca en Dart.
+- [ ] Compruebo las reglas antes de modificar el estado.
+- [ ] Puedo explicar por qué una observación contiene cultivos mediante composición.
+- [ ] Utilicé una copia no modificable de la lista de cultivos.
+- [ ] `CropArea`, `AgriculturalRecord` y `ObservationCatalog` tienen responsabilidades diferentes.
+- [ ] El catálogo evita duplicar observaciones.
+- [ ] La aplicación puede registrar, listar, consultar y eliminar observaciones.
+- [ ] Los porcentajes se calculan a partir de los objetos consultados.
+- [ ] Verifiqué los casos A–N, incluidos errores de entrada y referencias compartidas.
+- [ ] Corregí los errores intencionales antes de ejecutar el análisis estático.
+
+### Preguntas para explicar tu solución
+
+1. ¿En qué se diferencia un mapa que contiene datos de una clase que representa un concepto?
+2. ¿Qué diferencia hay entre una clase y una instancia?
+3. ¿Qué ventaja ofrece un constructor con parámetros obligatorios?
+4. ¿Por qué un método puede utilizar atributos del objeto sin recibirlos todos como argumentos?
+5. ¿Cuándo elegirías un getter calculado?
+6. ¿Por qué no conviene utilizar setters para todos los atributos?
+7. ¿Qué significa que un identificador con guion bajo sea privado a la biblioteca?
+8. ¿Por qué `AgriculturalRecord` tiene una lista de `CropArea`?
+9. ¿Qué sucede si dos variables comparten una lista mutable?
+10. ¿Qué operación debe rechazar una observación duplicada?
+11. ¿Por qué `ObservationCatalog.find` devuelve `AgriculturalRecord?`?
+12. ¿Qué responsabilidades tendrías que separar antes de reutilizar estas clases en Flutter?
+13. ¿Qué limitación conserva el programa al cerrar la terminal?
+
+### Criterios de finalización
+
+El laboratorio está completo cuando puedes ejecutar el catálogo orientado a objetos, explicar las responsabilidades de cada clase, registrar y consultar varias observaciones, demostrar que no se sobrescriben duplicados ni se comparten listas de manera accidental y reproducir las pruebas manuales. **Una sola ejecución favorable no es suficiente** para demostrar comprensión.
+
+## Continuidad — Laboratorio 05
+
+Ahora conoces los fundamentos de POO y has construido un catálogo mediante composición de objetos. El siguiente paso será aprender cuándo utilizar **herencia, interfaces y polimorfismo**, cómo manejar excepciones de forma explícita, cómo distribuir clases entre bibliotecas, cómo **leer y escribir JSON** y cómo ejecutar **pruebas unitarias**.
+
+Continúa con el [Laboratorio 05 — POO avanzada, manejo de datos, JSON y pruebas](laboratorio-05.md). Allí usarás los mismos conceptos de `CropArea` y `AgriculturalRecord`, adaptados a una aplicación que procesa datos desde archivos.
+
+## Referencias oficiales
+
+- [Dart — Clases](https://dart.dev/language/classes)
+- [Dart — Constructores](https://dart.dev/language/constructors)
+- [Dart — Variables y final](https://dart.dev/language/variables)
+- [Dart — Métodos](https://dart.dev/language/methods)
+- [Dart — Getters y setters](https://dart.dev/language/methods#getters-and-setters)
+- [Dart — Bibliotecas e imports](https://dart.dev/language/libraries)
+- [Dart — Colecciones](https://dart.dev/language/collections)
+- [Dart — Null safety](https://dart.dev/null-safety)
+- [Dart — Análisis estático](https://dart.dev/tools/dart-analyze)
+- [Dart — Formateo](https://dart.dev/tools/dart-format)
