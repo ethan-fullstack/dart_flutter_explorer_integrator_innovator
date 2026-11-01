@@ -622,3 +622,552 @@ Cambia temporalmente la importación a un nombre de paquete inexistente y ejecut
 
 ---
 
+## Práctica 5.4 — JSON, modelos tipados y archivos locales (45 min)
+
+### Objetivos
+
+Comprender la diferencia entre texto JSON, colecciones decodificadas y objetos de dominio; validar la estructura de los datos antes de utilizarlos; y guardar una copia exportada sin modificar el archivo de entrada.
+
+### 1. JSON no es un objeto de Dart
+
+Crea `data/observations.json` con este contenido **ficticio**:
+
+~~~json
+[
+  {
+    "municipality": "Andes",
+    "year": 2025,
+    "crops": [
+      {"name": "Coffee", "plantedArea": 125.0},
+      {"name": "Plantain", "plantedArea": 75.0},
+      {"name": "Avocado", "plantedArea": 50.0}
+    ]
+  },
+  {
+    "municipality": "La Mesa",
+    "year": 2024,
+    "crops": [
+      {"name": "Cocoa", "plantedArea": 20.0},
+      {"name": "Beans", "plantedArea": 30.0}
+    ]
+  }
+]
+~~~
+
+Aquí, `[]` representa una lista, `{}` representa un objeto JSON y cada par de nombre y valor representa una propiedad. Las superficies están en hectáreas **solo por convención del ejercicio**. El JSON es texto que **no conoce** las clases `CropArea` o `AgriculturalRecord`.
+
+### 2. Primer experimento con `jsonDecode`
+
+Crea `bin/json_experiment.dart`:
+
+~~~dart
+import 'dart:convert';
+
+void main() {
+  const source = '{"name":"Coffee","plantedArea":125.0}';
+
+  Object? decoded = jsonDecode(source);
+
+  if (decoded is! Map<String, dynamic>) {
+    print('Expected a JSON object.');
+    return;
+  }
+
+  print(decoded['name']);
+  print(decoded['plantedArea']);
+}
+~~~
+
+`dart:convert` proporciona `jsonDecode` y `jsonEncode`. La conversión interpreta un objeto JSON como un mapa y una matriz JSON como una lista. No devuelve automáticamente instancias de tus clases.
+
+**Antes de ejecutar:** predice los dos valores. Luego cambia `source` a `'not json'` y observa la excepción. Recupera después el texto válido.
+
+### 3. Un modelo de observación con reglas propias
+
+Crea `lib/src/model/agricultural_record.dart`:
+
+~~~dart
+import 'crop_area.dart';
+
+class AgriculturalRecord {
+  final String municipality;
+  final int year;
+  final List<CropArea> crops;
+
+  AgriculturalRecord({
+    required String municipality,
+    required this.year,
+    required List<CropArea> crops,
+  })  : municipality = municipality.trim(),
+        crops = List<CropArea>.unmodifiable(crops) {
+    if (this.municipality.isEmpty) {
+      throw FormatException('Municipality must not be empty.');
+    }
+
+    if (year < 2000 || year > 2100) {
+      throw FormatException('Year must be between 2000 and 2100.');
+    }
+
+    if (this.crops.isEmpty) {
+      throw FormatException('At least one crop is required.');
+    }
+
+    Set<String> uniqueNames = <String>{};
+
+    for (final crop in this.crops) {
+      String normalizedName = crop.name.toLowerCase();
+
+      if (!uniqueNames.add(normalizedName)) {
+        throw FormatException('Duplicate crop name: ' + crop.name);
+      }
+    }
+
+    if (!totalArea.isFinite) {
+      throw FormatException('Total planted area is not finite.');
+    }
+  }
+
+  double get totalArea {
+    return crops.fold<double>(
+      0.0,
+      (total, crop) => total + crop.plantedArea,
+    );
+  }
+
+  double get averageArea => totalArea / crops.length;
+
+  CropArea get largestCrop {
+    CropArea largest = crops.first;
+
+    for (final crop in crops.skip(1)) {
+      if (crop.plantedArea > largest.plantedArea) {
+        largest = crop;
+      }
+    }
+
+    return largest;
+  }
+}
+~~~
+
+El constructor comprueba las reglas **del escenario didáctico**. Usa `List<CropArea>.unmodifiable` para que el código exterior no pueda agregar o quitar cultivos de una observación ya construida, ni alterar directamente la lista recibida. Esto evita que una modificación externa invalide las reglas del modelo.
+
+**Detalle matemático:** los valores individuales pueden ser finitos y, aun así, una suma extremadamente grande podría desbordarse. Por eso se comprueba también `totalArea.isFinite`.
+
+**Ejercicio:** crea una observación válida con tres cultivos, muestra `totalArea`, `averageArea` y `largestCrop.name`. Después intenta construir una observación vacía, otra con nombres duplicados sin distinguir mayúsculas y una con año `1999`. Explica cada excepción.
+
+### 4. Convertir JSON a objetos sin suponer los tipos
+
+Crea `lib/src/storage/record_json_codec.dart`. La clase `RecordJsonCodec` se ocupará solo de la conversión, sin leer archivos ni imprimir menús:
+
+~~~dart
+import 'dart:convert';
+
+import '../model/agricultural_record.dart';
+import '../model/crop_area.dart';
+
+class RecordJsonCodec {
+  List<AgriculturalRecord> decodeRecords(String source) {
+    Object? root = jsonDecode(source);
+
+    if (root is! List<dynamic>) {
+      throw FormatException('Expected a JSON array of observations.');
+    }
+
+    List<AgriculturalRecord> records = <AgriculturalRecord>[];
+    Set<String> uniqueKeys = <String>{};
+
+    for (final rawRecord in root) {
+      if (rawRecord is! Map<String, dynamic>) {
+        throw FormatException('Every observation must be an object.');
+      }
+
+      Object? municipality = rawRecord['municipality'];
+      Object? year = rawRecord['year'];
+      Object? rawCrops = rawRecord['crops'];
+
+      if (municipality is! String ||
+          year is! int ||
+          rawCrops is! List<dynamic>) {
+        throw FormatException('Invalid observation fields.');
+      }
+
+      List<CropArea> crops = <CropArea>[];
+
+      for (final rawCrop in rawCrops) {
+        if (rawCrop is! Map<String, dynamic>) {
+          throw FormatException('Every crop must be an object.');
+        }
+
+        Object? name = rawCrop['name'];
+        Object? plantedArea = rawCrop['plantedArea'];
+
+        if (name is! String || plantedArea is! num) {
+          throw FormatException('Invalid crop fields.');
+        }
+
+        crops.add(
+          CropArea(
+            name: name,
+            plantedArea: plantedArea.toDouble(),
+          ),
+        );
+      }
+
+      AgriculturalRecord record = AgriculturalRecord(
+        municipality: municipality,
+        year: year,
+        crops: crops,
+      );
+
+      String key = record.municipality.toLowerCase() +
+          ' (' +
+          record.year.toString() +
+          ')';
+
+      if (!uniqueKeys.add(key)) {
+        throw FormatException('Duplicate municipality and year: ' + key);
+      }
+
+      records.add(record);
+    }
+
+    return records;
+  }
+
+  String encodeRecords(List<AgriculturalRecord> records) {
+    List<Map<String, Object?>> data = records.map((record) {
+      return <String, Object?>{
+        'municipality': record.municipality,
+        'year': record.year,
+        'crops': record.crops.map((crop) {
+          return <String, Object?>{
+            'name': crop.name,
+            'plantedArea': crop.plantedArea,
+          };
+        }).toList(),
+      };
+    }).toList();
+
+    return const JsonEncoder.withIndent('  ').convert(data);
+  }
+}
+~~~
+
+Observa esta secuencia de responsabilidades:
+
+- `jsonDecode`: convierte **texto JSON** en colecciones Dart.
+- Validaciones de `RecordJsonCodec`: comprueban la **estructura** y tipos esperados.
+- Constructores: garantizan las **invariantes** de cada objeto.
+- `jsonEncode` / `JsonEncoder`: transforman valores compatibles con JSON en **texto JSON**.
+
+**Atención:** este codec valida un formato diseñado para el laboratorio, no el esquema de una API de datos abiertos. Al integrar una fuente real habrá que investigar y documentar sus campos, unidades, nulabilidad y calidad antes de reutilizarlo.
+
+### 5. Importar los nuevos módulos
+
+Actualiza `lib/agrodiversa.dart` para que exponga las cuatro piezas. Su contenido completo será:
+
+~~~dart
+export 'src/model/crop_area.dart';
+export 'src/model/agricultural_record.dart';
+export 'src/services/report_formatter.dart';
+export 'src/storage/record_json_codec.dart';
+~~~
+
+No elimines los archivos de producción creados en las prácticas anteriores.
+
+### 6. Leer un archivo sin mezclarlo con el codec
+
+Crea `bin/json_file_experiment.dart`:
+
+~~~dart
+import 'dart:io';
+
+import 'package:dart_lab_05/agrodiversa.dart';
+
+void main() {
+  File inputFile = File('data/observations.json');
+  RecordJsonCodec codec = RecordJsonCodec();
+
+  try {
+    String source = inputFile.readAsStringSync();
+    List<AgriculturalRecord> records = codec.decodeRecords(source);
+
+    print('Observations: ' + records.length.toString());
+
+    for (final record in records) {
+      print(record.municipality + ': ' + record.totalArea.toString());
+    }
+  } on FileSystemException catch (error) {
+    print('File error: ' + error.message);
+  } on FormatException catch (error) {
+    print('Invalid data: ' + error.message);
+  }
+}
+~~~
+
+Desde la raíz del proyecto ejecuta:
+
+~~~bash
+dart run bin/json_file_experiment.dart
+~~~
+
+**Predice:** ¿cuántas observaciones y qué totales aparecerán? ¿Qué pasará si cambias la ruta a un archivo inexistente?
+
+El programa captura **`FileSystemException`** para problemas de archivos y **`FormatException`** para datos inválidos. No atrapa `RangeError`, `TypeError` ni errores de programación en un bloque genérico para ocultarlos.
+
+### 7. Exportar a otro archivo, nunca al origen
+
+Extiende el cuerpo válido del `try` anterior con:
+
+~~~dart
+String normalizedJson = codec.encodeRecords(records);
+
+File outputFile = File('data/normalized_observations.json');
+outputFile.writeAsStringSync(normalizedJson);
+
+print('Normalized file written: ' + outputFile.path);
+~~~
+
+Los archivos se usan de modo **síncrono**, aceptable para una pequeña herramienta didáctica de consola con datos locales. La API de `File` también permite lectura y escritura **asíncronas**; aprenderás a esperar esas operaciones en el Laboratorio 06.
+
+**Precaución:** el programa escribe siempre `normalized_observations.json`, no el archivo de entrada. Aunque la codificación se haga correctamente, sobrescribir el archivo de origen sin una copia sería un riesgo innecesario. La escritura hacia el archivo de salida reemplaza su contenido si ya existe; usa una ruta dedicada al resultado.
+
+### 8. ¿Qué ocurre ante JSON defectuoso?
+
+Crea una **copia temporal** del archivo de entrada para probar cada falla:
+
+- Reemplaza el `year` entero por texto: `"2025"`.
+- Sustituye el área por `"unknown"`.
+- Elimina la propiedad `crops` de una observación.
+- Repite el nombre de un cultivo dentro de la misma observación.
+- Agrega dos observaciones con mismo municipio y año, con diferentes mayúsculas.
+- Quita un corchete del documento, produciendo JSON mal formado.
+
+Para cada caso determina **qué componente** detecta el problema: decodificador JSON, validación de estructura o constructor del modelo.
+
+### Reto breve
+
+Implementa un pequeño programa que lea el archivo ficticio, muestre municipio, año, número de cultivos, total y cultivo con mayor área para cada observación, y genere una copia JSON normalizada. Comprueba que los resultados numéricos no estén escritos manualmente.
+
+### Comprobación
+
+¿Por qué `jsonDecode` no devuelve directamente `AgriculturalRecord`? ¿Qué representa `Map<String, dynamic>`? ¿Por qué las reglas se comprueban también en los constructores? ¿En qué se diferencian el archivo de entrada y el de salida?
+
+---
+
+## Práctica 5.5 — Pruebas automatizadas y casos límite (40 min)
+
+### Objetivos
+
+Comprobar reglas sin depender de la terminal ni del sistema de archivos y entender qué detecta una prueba que el analizador no puede detectar.
+
+### 1. Preparar `package:test`
+
+Desde la raíz del proyecto ejecuta:
+
+~~~bash
+dart pub add --dev test
+dart pub get
+~~~
+
+Esto registra `test` como **dependencia de desarrollo** en `pubspec.yaml`. No fijaremos manualmente una versión en la guía: la herramienta resolverá una versión compatible con tu SDK y registrará las versiones elegidas en los archivos del proyecto.
+
+Comprueba que exista la carpeta `test/` o créala. Si la plantilla genera una prueba de ejemplo, revísala antes de decidir si conservarla; no necesitas borrar pruebas válidas para añadir las nuevas.
+
+### 2. Anatomía de una prueba
+
+Crea `test/crop_area_test.dart`:
+
+~~~dart
+import 'package:dart_lab_05/agrodiversa.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('CropArea', () {
+    test('accepts a positive finite area and a non-empty name', () {
+      CropArea crop = CropArea(
+        name: ' Coffee ',
+        plantedArea: 125.0,
+      );
+
+      expect(crop.name, equals('Coffee'));
+      expect(crop.plantedArea, equals(125.0));
+    });
+
+    test('rejects an empty crop name', () {
+      expect(
+        () => CropArea(name: '   ', plantedArea: 10.0),
+        throwsA(isA<FormatException>()),
+      );
+    });
+  });
+}
+~~~
+
+- `group` agrupa casos relacionados.
+- `test` declara un comportamiento verificable.
+- `expect` contrasta el resultado real con una expectativa.
+- `throwsA(isA<FormatException>())` indica que **debe lanzarse** esa excepción.
+
+La función entregada a `expect` **no ejecuta el constructor antes de tiempo**: deja que el framework observe la excepción al invocarla.
+
+Ejecuta:
+
+~~~bash
+dart test test/crop_area_test.dart
+~~~
+
+### 3. Ampliar los casos del modelo
+
+Agrega pruebas para:
+
+- Área negativa: `-1.0`.
+- Área cero: `0.0`.
+- Área no finita: `double.nan`.
+- Área infinita: `double.infinity`.
+- Nombre que contiene solo espacios.
+- Nombre que tiene espacios exteriores, pero es válido después de `trim()`.
+
+Usa nombres de prueba que expliquen el comportamiento, no títulos genéricos como `test 1` o `works`.
+
+### 4. Pruebas del registro agrícola
+
+Crea `test/agricultural_record_test.dart`:
+
+~~~dart
+import 'package:dart_lab_05/agrodiversa.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('AgriculturalRecord', () {
+    test('calculates total, average, and largest crop', () {
+      AgriculturalRecord record = AgriculturalRecord(
+        municipality: 'Andes',
+        year: 2025,
+        crops: [
+          CropArea(name: 'Coffee', plantedArea: 125.0),
+          CropArea(name: 'Plantain', plantedArea: 75.0),
+          CropArea(name: 'Avocado', plantedArea: 50.0),
+        ],
+      );
+
+      expect(record.totalArea, closeTo(250.0, 0.000001));
+      expect(record.averageArea, closeTo(250.0 / 3, 0.000001));
+      expect(record.largestCrop.name, equals('Coffee'));
+    });
+
+    test('rejects duplicate names ignoring case', () {
+      expect(
+        () => AgriculturalRecord(
+          municipality: 'Andes',
+          year: 2025,
+          crops: [
+            CropArea(name: 'Coffee', plantedArea: 10.0),
+            CropArea(name: 'coffee', plantedArea: 20.0),
+          ],
+        ),
+        throwsA(isA<FormatException>()),
+      );
+    });
+  });
+}
+~~~
+
+**Ejercicio:** añade una prueba para año fuera del rango y otra para lista de cultivos vacía. Añade una prueba con empate que compruebe que se conserva el primero. Después pasa una lista mutable al constructor, agrégale otro cultivo y verifica que el registro mantenga su número original.
+
+### 5. Pruebas del codec sin archivos reales
+
+Crea `test/record_json_codec_test.dart`:
+
+~~~dart
+import 'package:dart_lab_05/agrodiversa.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('RecordJsonCodec', () {
+    final codec = RecordJsonCodec();
+
+    test('decodes a valid observation', () {
+      const source = '''
+      [
+        {
+          "municipality": "Andes",
+          "year": 2025,
+          "crops": [
+            {"name": "Coffee", "plantedArea": 125}
+          ]
+        }
+      ]
+      ''';
+
+      List<AgriculturalRecord> records = codec.decodeRecords(source);
+
+      expect(records, hasLength(1));
+      expect(records.first.totalArea, equals(125.0));
+    });
+
+    test('rejects a JSON object instead of an array', () {
+      expect(
+        () => codec.decodeRecords('{"municipality":"Andes"}'),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('rejects a crop area with the wrong JSON type', () {
+      const source = '''
+      [
+        {
+          "municipality": "Andes",
+          "year": 2025,
+          "crops": [
+            {"name": "Coffee", "plantedArea": "unknown"}
+          ]
+        }
+      ]
+      ''';
+
+      expect(
+        () => codec.decodeRecords(source),
+        throwsA(isA<FormatException>()),
+      );
+    });
+  });
+}
+~~~
+
+Estas son **pruebas unitarias**: entregan cadenas JSON directamente al codec. Así pueden ejecutarse sin red, archivos ni permisos especiales.
+
+**Ejercicio — Ida y vuelta:** crea un registro válido, ejecútale `codec.encodeRecords`, vuelve a decodificar el texto y comprueba municipio, año, cantidad de cultivos y áreas. No compares necesariamente dos listas de objetos por `==`: todavía no hemos implementado igualdad por valor en los modelos. Compara sus **propiedades**.
+
+### 6. Prueba que falla por una razón conocida
+
+En una copia temporal de `CropArea`, quita la validación `plantedArea <= 0`. Ejecuta las pruebas: las pruebas sobre áreas negativas y cero deberían fallar. Restaura la regla y vuelve a ejecutarlas.
+
+Esto muestra por qué una prueba útil debe fallar cuando se rompe el comportamiento que verifica.
+
+### 7. Ejecutar la suite y analizar
+
+~~~bash
+dart format lib bin test
+dart analyze
+dart test
+~~~
+
+El comando `dart analyze` busca problemas estáticos; `dart test` ejecuta afirmaciones sobre el comportamiento. Son controles complementarios: un programa puede analizarse correctamente y, aun así, producir porcentajes erróneos.
+
+### Reto breve — Contratos en condiciones extremas
+
+Agrega dos pruebas nuevas:
+
+1. Un conjunto de superficies individuales finitas tan grandes que su **suma no sea finita** debe ser rechazado por `AgriculturalRecord`.
+2. Dos observaciones con el mismo municipio y año, aun con diferentes mayúsculas en el municipio, deben ser rechazadas por `RecordJsonCodec`.
+
+Comprueba que el mensaje de fallo de cada prueba permita identificar **qué regla** se rompió.
+
+### Comprobación
+
+¿Cuándo se utiliza un `expect` de igualdad y cuándo uno de excepción? ¿Por qué probar el codec con una cadena JSON es preferible a abrir un archivo para todos los casos? ¿Cómo se relacionan el constructor, sus invariantes y las pruebas unitarias?
+
+---
+
