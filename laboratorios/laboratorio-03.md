@@ -18,9 +18,7 @@ Los municipios, cultivos y superficies de los ejemplos son ficticios. Los cálcu
 | 3.4 | `Map`: claves, valores, registros y anidación | 45 min |
 | 3.5 | Filtrar, transformar, ordenar y resumir colecciones | 35 min |
 | 3.6 | Reto integrador: catálogo de observaciones agrícolas | 80 min |
-| **Total** | | **270 min (4,5 horas)** |
-
-### Objetivos
+| **Total** | | **270 min (4,5 h)** |
 
 Al finalizar podrás:
 
@@ -71,8 +69,6 @@ Los identificadores y mensajes del código están en inglés. Comprueba los ejem
 ---
 
 ## Práctica 3.1 — Funciones y responsabilidades (35 min)
-
-### Objetivos
 
 Mejorar el diseño de funciones, comprender los parámetros nombrados y evitar mezclar lectura de terminal, cálculo y presentación.
 
@@ -200,7 +196,7 @@ La función recibe valores mediante el parámetro `areas` y utiliza una variable
 Implementa:
 
 - `double calculateTotal(List<double> areas)`: suma superficies.
-- `double calculateAverage(List<double> areas)`: calcula promedio; para una lista vacía devuelve `0.0` como regla didáctica.
+- `double calculateAverage(List<double> areas)`: calcula promedio; para una lista vacía devuelve `0.0` como regla del ejercicio.
 - `void showSummary({required String municipality, required double total, required double average})`: muestra resultados sin volver a calcularlos.
 
 Usa las listas `[20.0, 30.0]` y `[10.0, 20.0, 30.0]`. Predice sus totales y promedios antes de ejecutar.
@@ -226,8 +222,6 @@ El código es sintácticamente válido, pero los argumentos no representan corre
 ---
 
 ## Práctica 3.2 — Listas: datos ordenados (40 min)
-
-### Objetivos
 
 Crear, recorrer y modificar listas, comprender índices y evitar confundir referencias compartidas con copias.
 
@@ -411,8 +405,6 @@ Crea una lista de cultivos. Debe permitir agregar nombres, mostrar su posición,
 
 ## Práctica 3.3 — Conjuntos: valores únicos (35 min)
 
-### Objetivos
-
 Comprender el propósito de `Set`, normalizar nombres y distinguir registros repetidos de categorías únicas.
 
 ### 1. Una colección sin duplicados
@@ -542,8 +534,6 @@ Parte de seis nombres con repeticiones, espacios y diferencias de mayúsculas. C
 ---
 
 ## Práctica 3.4 — Mapas: claves, valores y registros anidados (45 min)
-
-### Objetivos
 
 Relacionar datos mediante claves, detectar claves repetidas, acceder a valores que pueden faltar y organizar datos relacionados sin crear clases todavía.
 
@@ -792,8 +782,6 @@ Construye un `Map<String, Map<String, double>>` con **tres observaciones**, al m
 
 ## Práctica 3.5 — Filtrar, transformar y resumir colecciones (35 min)
 
-### Objetivos
-
 Comparar ciclos explícitos con operaciones sobre `Iterable` y aprender a identificar cuándo se produce una lista nueva y cuándo se modifica la colección original.
 
 ### 1. Primero resolver con `for`
@@ -1009,7 +997,7 @@ Map<String, Map<String, double>> observations = <String, Map<String, double>>{};
 
 El mapa externo relaciona una **clave de observación** con un mapa de cultivos. El mapa interno relaciona el **nombre del cultivo** con su superficie. Una observación se identificará, por ejemplo, mediante la clave normalizada `andes (2025)`.
 
-> **Reglas del escenario:** los años de `2000` a `2100`, las superficies positivas y finitas y el máximo de cinco cultivos son límites **didácticos**, no requisitos de un conjunto de datos público. Ante un empate de superficies máximas, se conservará el **primer** cultivo ingresado. No deduzcas diagnósticos agrícolas a partir de estos cálculos.
+En el catálogo, los años válidos van de `2000` a `2100`, las superficies deben ser positivas y finitas y cada observación admite hasta cinco cultivos. Si dos cultivos tienen el área máxima, se conserva el primero ingresado.
 
 ### Ejemplo de menú
 
