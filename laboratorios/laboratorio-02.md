@@ -72,6 +72,12 @@ La ruta principal utiliza Dart en una terminal: los ejercicios con `dart:io` y `
 
 ---
 
+### Organización del trabajo en GitHub
+
+Desde este laboratorio, utiliza **un único repositorio individual y acumulativo** para toda la ruta. Guarda este proyecto en `lab-02/dart_lab_02/`; conserva `lab-01/` y las demás carpetas anteriores cuando existan. Ejecuta `dart create -t console dart_lab_02` desde `lab-02/`, y ejecuta `dart run`, `dart analyze` y las instrucciones de cada práctica desde la raíz de `dart_lab_02/`.
+
+La estructura anterior es la del **repositorio personal de desarrollo**, no la del repositorio que aloja las guías. Después de terminar, actualiza el README principal con el estado, las instrucciones de ejecución y los cambios de las versiones anteriores. Registra commits significativos, sin una cantidad mínima artificial. Cada laboratorio requiere también un **informe PDF obligatorio** como segunda evidencia; se prepara para la entrega, sin reducir las horas de programación.
+
 ## Práctica 2.1 — Comparaciones y lógica booleana (35 min)
 
 ### Objetivos
@@ -1258,9 +1264,69 @@ Agrega una opción que muestre únicamente el nombre del cultivo predominante y 
 
 ## Entrega y autoevaluación
 
-El archivo principal es `bin/agricultural_explorer.dart`, acompañado por tus prácticas `practice_21.dart` a `practice_25.dart`. Conserva también los ejercicios adicionales que consideres útiles.
+La entrega de este laboratorio consta de **dos evidencias obligatorias**: un repositorio individual acumulativo en GitHub y un **informe PDF**. El código debe poder ejecutarse y verificarse; el PDF explica sus resultados y decisiones.
 
-No se requiere un informe extenso, una colección de capturas de pantalla ni herramientas de administración de proyectos. **La evidencia principal es poder ejecutar, explicar y comprobar el código.**
+### Evidencia 1 — GitHub
+
+- Utilizar el **mismo repositorio individual** desde el Laboratorio 01; conservar las carpetas de los laboratorios anteriores sin sobrescribir sus versiones.
+- Agregar la carpeta `lab-02/dart_lab_02/`, con el proyecto Dart, su configuración y los archivos de ejercicios desarrollados.
+- Incluir como producto principal bin/agricultural_explorer.dart y conservar los demás archivos correspondientes a las prácticas de este laboratorio.
+- Implementar y demostrar: Menú, condiciones, ciclos, validaciones `tryParse`, acumulación y máximo; pruebas A–H.
+- Registrar **commits significativos** que evidencien implementación, mejoras, depuración y correcciones reales, sin exigir un número fijo.
+- Actualizar el **README principal** con el estado y las instrucciones de ejecución de los laboratorios 01 al 02, así como las funcionalidades incorporadas.
+- Evitar subir credenciales, archivos temporales o resultados generados innecesarios.
+
+### Evidencia 2 — Informe PDF
+
+El documento debe incluir:
+
+1. Identificación de la persona que desarrolla, número del laboratorio y enlace al repositorio individual.
+2. Descripción de las nuevas funcionalidades de explorador interactivo y de sus archivos principales.
+3. Decisiones técnicas justificadas: condiciones, ciclos, validaciones y estado del menú.
+4. Resultados de las pruebas y verificaciones: casos probados, resultados esperados y observados, errores y correcciones.
+5. Seguimiento de GitHub y evolución del sistema: commits representativos y cambios progresivos. Comparar las validaciones y el menú del Laboratorio 02 con la ficha del 01; explicar qué falta conservar.
+6. Respuestas argumentadas a las cinco situaciones de análisis siguientes.
+
+El PDF no necesita una extensión fija ni capturas de cada instrucción; **sí debe explicar y respaldar el trabajo con evidencias concretas** de código, resultados y commits. Su preparación es parte de la entrega posterior a la sesión práctica de 4,5 horas.
+
+### Preguntas de análisis
+
+Responde **estas cinco preguntas en el PDF**. En cada caso explica cómo identificarías el problema, qué cambio aplicarías con los conceptos del laboratorio y cómo verificarías que funciona.
+
+**1. ¿Qué harías si una superficie `abc` cierra inesperadamente el programa?**
+
+Explica el cambio de `parse` a `tryParse`, la repetición de la entrada y las comprobaciones del menú.
+
+**2. ¿Qué harías si la aplicación solicita cultivos indefinidamente?**
+
+Revisa condición y actualización del contador; comprueba límites de uno y cinco cultivos.
+
+**3. ¿Qué harías si el segundo registro acumula áreas del primero?**
+
+Identifica dónde reiniciar el acumulador y diseña una comprobación de reemplazo.
+
+**4. ¿Qué harías si el máximo siempre corresponde al último cultivo?**
+
+Corrige la comparación y el momento de actualizar el nombre; prueba un empate.
+
+**5. ¿Qué harías si una opción desconocida bloquea el menú?**
+
+Explica el uso de `switch`, `default`, `while` y la validación de opciones.
+
+### Preguntas de repaso (opcionales)
+
+Las siguientes preguntas originales sirven para estudiar; **no sustituyen** las cinco preguntas de análisis exigidas en el PDF.
+
+1. ¿Qué diferencia hay entre `=` y `==`?
+2. ¿Por qué una cadena no puede utilizarse directamente como condición de `if` en Dart?
+3. ¿Por qué el orden de `else if` puede cambiar el resultado?
+4. ¿En qué se diferencian `for` y `while`?
+5. ¿Qué provoca un ciclo infinito?
+6. ¿Qué diferencia hay entre `int.parse` e `int.tryParse`?
+7. ¿Por qué `-10` puede convertirse a número pero no aceptarse como superficie positiva?
+8. ¿Por qué debe reiniciarse el total para un registro nuevo?
+9. ¿Qué sucede si hay empate entre dos superficies máximas?
+10. ¿Qué información falta guardar para poder listar todos los cultivos después de capturarlos?
 
 ### Lista de verificación
 
@@ -1277,22 +1343,13 @@ No se requiere un informe extenso, una colección de capturas de pantalla ni her
 - [ ] He comprobado los casos A–H.
 - [ ] El código final no conserva errores intencionales.
 
-### Preguntas para explicar tu solución
-
-1. ¿Qué diferencia hay entre `=` y `==`?
-2. ¿Por qué una cadena no puede utilizarse directamente como condición de `if` en Dart?
-3. ¿Por qué el orden de `else if` puede cambiar el resultado?
-4. ¿En qué se diferencian `for` y `while`?
-5. ¿Qué provoca un ciclo infinito?
-6. ¿Qué diferencia hay entre `int.parse` e `int.tryParse`?
-7. ¿Por qué `-10` puede convertirse a número pero no aceptarse como superficie positiva?
-8. ¿Por qué debe reiniciarse el total para un registro nuevo?
-9. ¿Qué sucede si hay empate entre dos superficies máximas?
-10. ¿Qué información falta guardar para poder listar todos los cultivos después de capturarlos?
-
 ### Criterios de finalización
 
 El reto está completo cuando puedes registrar y consultar observaciones, explicar el recorrido de las condiciones y ciclos, reproducir las pruebas numéricas y de error, demostrar que el segundo registro reemplaza el resumen y justificar las limitaciones de la solución. **Una ejecución correcta con un solo juego de datos no es una verificación suficiente.**
+
+### Condiciones de entrega
+
+**Adjunta el informe PDF y proporciona el enlace al repositorio individual de GitHub.** El repositorio debe permitir revisar las versiones acumuladas desde el Laboratorio 01, los commits y las instrucciones para ejecutar el proyecto actual. El informe debe justificar las decisiones técnicas, presentar resultados de verificación y analizar la evolución de la aplicación.
 
 ## Continuidad
 
