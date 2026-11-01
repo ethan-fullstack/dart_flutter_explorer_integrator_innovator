@@ -5,6 +5,7 @@ Ruta práctica de programación con **Dart** y desarrollo de aplicaciones con **
 ## Comienza aquí
 
 - [Laboratorio 01 — Primeros pasos en programación con Dart](laboratorios/laboratorio-01.md)
+- [Laboratorio 02 — Decisiones, ciclos y validación de datos en Dart](laboratorios/laboratorio-02.md)
 
 ## Cómo se aprende
 
