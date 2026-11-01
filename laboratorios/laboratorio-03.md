@@ -425,14 +425,15 @@ Crea `bin/practice_33.dart`:
 
 ~~~dart
 void main() {
-  Set<String> crops = {'Coffee', 'Cocoa', 'Coffee', 'Beans'};
+  Set<String> crops = {'Coffee', 'Cocoa', 'Beans'};
+  crops.add('Coffee');
 
   print(crops.length);
   print(crops.contains('Coffee'));
 }
 ~~~
 
-Aunque aparezcan cuatro valores en el literal, solo existen **tres elementos distintos**. Un conjunto representa **pertenencia y unicidad**, no acceso por posición. No utilices `crops[0]`.
+Aunque intentaste incorporar **cuatro valores** mediante el literal y `add`, el conjunto conserva **tres elementos distintos**. Un conjunto representa **pertenencia y unicidad**, no acceso por posición. No utilices `crops[0]`.
 
 ### 2. Lista de registros y conjunto de valores únicos
 
