@@ -763,3 +763,576 @@ Prueba dos contadores diferentes: actualizar uno no debe modificar el otro.
 
 ---
 
+## Práctica 4.4 — Composición: una observación contiene cultivos (40 min)
+
+### Objetivos
+
+Representar relaciones entre objetos, almacenar una colección dentro de otro objeto, calcular propiedades a partir de esa colección y evitar que una modificación externa altere accidentalmente el estado.
+
+### 1. El límite del mapa anidado
+
+En el Laboratorio 03 podías escribir:
+
+~~~dart
+void main() {
+  Map<String, Map<String, double>> observations = {
+    'andes (2025)': {
+      'Coffee': 125.0,
+      'Plantain': 75.0,
+      'Avocado': 50.0,
+    },
+  };
+
+  print(observations['andes (2025)']);
+}
+~~~
+
+La clave contiene municipio y año en un mismo texto. El mapa interno contiene áreas, pero no garantiza por sí mismo que sus números sean finitos, positivos o que una observación tenga por lo menos un cultivo.
+
+Con POO puedes expresar el mismo dominio mediante **dos conceptos diferentes**:
+
+- `CropArea` representa **un cultivo observado y su superficie**.
+- `AgriculturalRecord` representa **una observación de municipio y año que contiene cultivos**.
+
+Esta relación se llama **composición**: una instancia utiliza otras instancias como parte de su estado. No se trata de herencia porque una observación no **es un tipo de cultivo**.
+
+### 2. Una observación con una lista de objetos
+
+Crea `bin/practice_44.dart`:
+
+~~~dart
+class CropArea {
+  final String name;
+  final double plantedArea;
+
+  CropArea({required this.name, required this.plantedArea});
+}
+
+class AgriculturalRecord {
+  final String municipality;
+  final int year;
+  final List<CropArea> crops;
+
+  AgriculturalRecord({
+    required this.municipality,
+    required this.year,
+    required this.crops,
+  });
+}
+
+void main() {
+  AgriculturalRecord record = AgriculturalRecord(
+    municipality: 'Andes',
+    year: 2025,
+    crops: [
+      CropArea(name: 'Coffee', plantedArea: 125.0),
+      CropArea(name: 'Plantain', plantedArea: 75.0),
+      CropArea(name: 'Avocado', plantedArea: 50.0),
+    ],
+  );
+
+  print(record.municipality);
+  print(record.year);
+  print(record.crops.length);
+}
+~~~
+
+Cada `CropArea` es un objeto independiente. `AgriculturalRecord` contiene una `List<CropArea>`, no tres campos con nombres como `firstCrop`, `secondCrop` y `thirdCrop`.
+
+**Antes de ejecutar:** predice qué imprime `record.crops.length`. Después agrega un cuarto objeto e identifica qué parte del código necesitaste cambiar.
+
+### 3. Calcular desde los objetos
+
+Agrega dentro de la clase `AgriculturalRecord` un getter:
+
+~~~dart
+double get totalArea {
+  double total = 0.0;
+
+  for (final crop in crops) {
+    total += crop.plantedArea;
+  }
+
+  return total;
+}
+~~~
+
+**Este fragmento es un miembro de clase**, no un archivo completo ni un método para colocar dentro de `main()`.
+
+Luego consulta el total:
+
+~~~dart
+print(record.totalArea);
+~~~
+
+Debería ser `250.0` con los datos originales.
+
+**Ejercicio:** crea un getter `double get averageArea => totalArea / crops.length;` y consulta el promedio. Por ahora utiliza solamente registros con **al menos un cultivo** para evitar dividir entre cero.
+
+### 4. ¿Qué ocurre si la lista original cambia?
+
+Con el primer diseño, un código exterior puede modificar la lista después de crear el objeto:
+
+~~~dart
+class CropArea {
+  final String name;
+  final double plantedArea;
+
+  CropArea({required this.name, required this.plantedArea});
+}
+
+class AgriculturalRecord {
+  final List<CropArea> crops;
+
+  AgriculturalRecord({required this.crops});
+
+  int get cropCount => crops.length;
+}
+
+void main() {
+  List<CropArea> inputCrops = [
+    CropArea(name: 'Coffee', plantedArea: 125.0),
+  ];
+
+  AgriculturalRecord record = AgriculturalRecord(crops: inputCrops);
+
+  inputCrops.add(CropArea(name: 'Beans', plantedArea: 40.0));
+
+  print(record.cropCount);
+}
+~~~
+
+El objeto `record` comparte la misma lista con `inputCrops`. ¡Incluso el campo `final` no impide que se modifiquen sus elementos!
+
+**Predice** si el resultado es uno o dos. Explica la diferencia entre no poder reasignar una referencia y no poder modificar el objeto al que apunta.
+
+### 5. Una copia de solo lectura
+
+Para evitar ese problema, guarda en el constructor una copia no modificable:
+
+~~~dart
+class CropArea {
+  final String name;
+  final double plantedArea;
+
+  CropArea({required this.name, required this.plantedArea});
+}
+
+class AgriculturalRecord {
+  final List<CropArea> crops;
+
+  AgriculturalRecord({required List<CropArea> crops})
+      : crops = List<CropArea>.unmodifiable(crops);
+
+  int get cropCount => crops.length;
+}
+
+void main() {
+  List<CropArea> inputCrops = [
+    CropArea(name: 'Coffee', plantedArea: 125.0),
+  ];
+
+  AgriculturalRecord record = AgriculturalRecord(crops: inputCrops);
+
+  inputCrops.add(CropArea(name: 'Beans', plantedArea: 40.0));
+
+  print(inputCrops.length);
+  print(record.cropCount);
+}
+~~~
+
+`List<CropArea>.unmodifiable(crops)` crea una copia cuyo contenido no se puede agregar, quitar ni reasignar desde fuera. Con los valores de `CropArea` declarados como `final`, el registro mantiene su información estable.
+
+La copia de lista es **superficial**: si los elementos fueran objetos mutables, todavía podrían modificarse mediante otras referencias. Por eso el diseño de `CropArea` también importa.
+
+### 6. Modelo completo de la práctica
+
+Reemplaza las dos clases de `practice_44.dart` por las siguientes y conserva un `main()` de comprobación al final:
+
+~~~dart
+class CropArea {
+  final String name;
+  final double plantedArea;
+
+  CropArea({
+    required String name,
+    required this.plantedArea,
+  }) : name = name.trim() {
+    if (this.name.isEmpty) {
+      throw ArgumentError.value(name, 'name', 'Name is required.');
+    }
+
+    if (!plantedArea.isFinite || plantedArea <= 0) {
+      throw ArgumentError.value(
+        plantedArea,
+        'plantedArea',
+        'Area must be positive and finite.',
+      );
+    }
+  }
+}
+
+class AgriculturalRecord {
+  final String municipality;
+  final int year;
+  final List<CropArea> crops;
+
+  AgriculturalRecord({
+    required String municipality,
+    required this.year,
+    required List<CropArea> crops,
+  })  : municipality = municipality.trim(),
+        crops = List<CropArea>.unmodifiable(crops) {
+    if (this.municipality.isEmpty) {
+      throw ArgumentError.value(
+        municipality,
+        'municipality',
+        'Municipality is required.',
+      );
+    }
+
+    if (year < 2000 || year > 2100) {
+      throw ArgumentError.value(year, 'year', 'Invalid year.');
+    }
+
+    if (this.crops.isEmpty) {
+      throw ArgumentError.value(crops, 'crops', 'At least one crop is required.');
+    }
+
+    Set<String> uniqueNames = <String>{};
+
+    for (final crop in this.crops) {
+      String normalizedName = crop.name.toLowerCase();
+
+      if (!uniqueNames.add(normalizedName)) {
+        throw ArgumentError.value(
+          crop.name,
+          'crop',
+          'Duplicate crop name.',
+        );
+      }
+    }
+
+    if (!totalArea.isFinite) {
+      throw ArgumentError('Total area must be finite.');
+    }
+  }
+
+  double get totalArea {
+    double total = 0.0;
+
+    for (final crop in crops) {
+      total += crop.plantedArea;
+    }
+
+    return total;
+  }
+
+  double get averageArea => totalArea / crops.length;
+
+  CropArea get largestCrop {
+    CropArea largest = crops.first;
+
+    for (final crop in crops.skip(1)) {
+      if (crop.plantedArea > largest.plantedArea) {
+        largest = crop;
+      }
+    }
+
+    return largest;
+  }
+
+  double get largestShare => largestCrop.plantedArea / totalArea * 100;
+}
+
+void main() {
+  AgriculturalRecord record = AgriculturalRecord(
+    municipality: 'Andes',
+    year: 2025,
+    crops: [
+      CropArea(name: 'Coffee', plantedArea: 125.0),
+      CropArea(name: 'Plantain', plantedArea: 75.0),
+      CropArea(name: 'Avocado', plantedArea: 50.0),
+    ],
+  );
+
+  print(record.municipality);
+  print(record.year);
+  print(record.crops.length);
+  print(record.totalArea.toStringAsFixed(2));
+  print(record.averageArea.toStringAsFixed(2));
+  print(record.largestCrop.name);
+  print(record.largestShare.toStringAsFixed(2));
+}
+~~~
+
+Este modelo incluye decisiones de dominio deliberadamente sencillas:
+
+- El municipio no está vacío.
+- El año debe estar entre `2000` y `2100` **por regla didáctica**.
+- Debe existir por lo menos un cultivo.
+- Cada cultivo tiene un nombre no vacío y una superficie positiva y finita.
+- Los nombres no pueden repetirse dentro de la observación después de normalizar mayúsculas y espacios exteriores.
+- El total debe ser finito, incluso si los números individuales son finitos.
+- Ante un empate de áreas, `largestCrop` conserva el **primer cultivo**, porque la comparación usa `>` y no `>=`.
+
+**No cambies estas reglas por categorías agrícolas externas sin evidencia.** El propósito es comprender constructores, composición e invariantes. En el Laboratorio 05 profundizarás en los tipos de excepción y en las pruebas automáticas.
+
+### 7. Comprueba los datos originales
+
+Con `125.0`, `75.0` y `50.0`:
+
+| Resultado | Valor esperado |
+|---|---:|
+| Cultivos | 3 |
+| Área total | 250.00 ha |
+| Área promedio | 83.33 ha |
+| Cultivo mayor | Coffee |
+| Área del cultivo mayor | 125.00 ha |
+| Participación del mayor | 50.00% |
+
+Cambia los datos a `20.0`, `20.0` y `10.0`. Comprueba que el primer cultivo de `20.0` permanece como mayor y que su participación es `40.00%`.
+
+### Depuración — Lista compartida
+
+Vuelve temporalmente al constructor `AgriculturalRecord({required this.crops});` que conserva la lista original. Después modifica desde fuera la lista de entrada y comprueba cómo cambia el resultado de `record.totalArea`. Recupera la copia no modificable.
+
+### Reto — Objeto coherente
+
+Construye dos `AgriculturalRecord` con municipios o años diferentes. Comprueba que sus totales se calculan por separado, que cada lista tiene sus propios cultivos y que las estadísticas se obtienen a partir de los objetos, no de valores escritos manualmente.
+
+### Comprobación
+
+¿Por qué una observación **contiene** cultivos y no **hereda** de ellos? ¿Por qué `final List<CropArea>` no impide modificaciones internas? ¿Qué ventaja tiene `List.unmodifiable`? ¿Por qué `totalArea` se calcula con un getter y no se recibe como dato adicional?
+
+---
+
+## Práctica 4.5 — Colaboración: un catálogo administra observaciones (40 min)
+
+### Objetivos
+
+Separar un registro individual del conjunto de registros; utilizar un mapa interno para búsquedas eficientes; exponer operaciones de catálogo sin entregar su colección interna para modificaciones arbitrarias.
+
+### 1. Tres responsabilidades distintas
+
+En el reto del Laboratorio 03, el mapa exterior guardaba varias observaciones. Ahora distribuirás esa responsabilidad:
+
+| Clase | Representa | Responsabilidad |
+|---|---|---|
+| `CropArea` | Un cultivo y su área | Guardar datos válidos de un cultivo |
+| `AgriculturalRecord` | Municipio, año y cultivos | Calcular estadísticas de una observación |
+| `ObservationCatalog` | Colección de observaciones | Agregar, encontrar, eliminar y listar observaciones |
+
+**No crees una clase distinta para cada cultivo**. Los datos de cultivo son **instancias**, no tipos diferentes.
+
+### 2. Un catálogo con un mapa privado
+
+En `bin/practice_45.dart` copia primero las implementaciones completas de `CropArea` y `AgriculturalRecord` de la práctica 4.4, **sin copiar su `main()`**. Después agrega:
+
+~~~dart
+class ObservationCatalog {
+  final Map<String, AgriculturalRecord> _records =
+      <String, AgriculturalRecord>{};
+
+  String _buildKey(String municipality, int year) {
+    String normalized = municipality.trim().toLowerCase();
+    return '$normalized ($year)';
+  }
+
+  int get count => _records.length;
+
+  bool add(AgriculturalRecord record) {
+    String key = _buildKey(record.municipality, record.year);
+
+    if (_records.containsKey(key)) {
+      return false;
+    }
+
+    _records[key] = record;
+    return true;
+  }
+
+  AgriculturalRecord? find(String municipality, int year) {
+    String key = _buildKey(municipality, year);
+    return _records[key];
+  }
+}
+~~~
+
+**Este fragmento es la declaración de una clase**; no es un programa independiente. Para ejecutarlo, añade las clases requeridas y un `main()` de comprobación.
+
+Observa los cambios respecto a la solución basada en mapas:
+
+- El mapa interno relaciona una clave de búsqueda con un **objeto `AgriculturalRecord`**.
+- `_buildKey` concentra la normalización: agregar y buscar utilizan la misma regla.
+- `add` devuelve `false` si ya existe una observación de ese municipio y año; **no sobrescribe**.
+- `find` devuelve `AgriculturalRecord?` porque puede no existir ninguna observación con esa clave.
+
+### 3. Probar colaboración entre clases
+
+Agrega temporalmente este `main()`:
+
+~~~dart
+void main() {
+  ObservationCatalog catalog = ObservationCatalog();
+
+  AgriculturalRecord first = AgriculturalRecord(
+    municipality: 'Andes',
+    year: 2025,
+    crops: [
+      CropArea(name: 'Coffee', plantedArea: 125.0),
+    ],
+  );
+
+  print(catalog.add(first));
+  print(catalog.count);
+
+  AgriculturalRecord? result = catalog.find(' ANDES ', 2025);
+
+  if (result == null) {
+    print('Observation not found.');
+  } else {
+    print(result.totalArea.toStringAsFixed(2));
+  }
+}
+~~~
+
+**Predice** los resultados. ¿Por qué la búsqueda `' ANDES '` encuentra la misma observación guardada como `'Andes'`?
+
+### 4. Evitar sobrescrituras involuntarias
+
+Agrega a `main()` otra instancia:
+
+~~~dart
+AgriculturalRecord duplicate = AgriculturalRecord(
+  municipality: 'andes',
+  year: 2025,
+  crops: [
+    CropArea(name: 'Beans', plantedArea: 40.0),
+  ],
+);
+
+bool wasAdded = catalog.add(duplicate);
+print(wasAdded);
+print(catalog.count);
+~~~
+
+Las claves son equivalentes tras la normalización, de modo que `add` devuelve `false`. **No sobrescribe** la primera observación.
+
+**Ejercicio:** agrega otra observación de Andes para **2024** y comprueba que puede coexistir con la de 2025.
+
+### 5. Completar el catálogo: consulta, eliminación y orden
+
+Agrega estos métodos **dentro** de `ObservationCatalog`, después de `find`:
+
+~~~dart
+bool remove(String municipality, int year) {
+  String key = _buildKey(municipality, year);
+  return _records.remove(key) != null;
+}
+
+List<AgriculturalRecord> listRecords() {
+  List<AgriculturalRecord> result = _records.values.toList();
+
+  result.sort((first, second) {
+    String firstKey = _buildKey(first.municipality, first.year);
+    String secondKey = _buildKey(second.municipality, second.year);
+    return firstKey.compareTo(secondKey);
+  });
+
+  return List<AgriculturalRecord>.unmodifiable(result);
+}
+
+List<String> get uniqueCropNames {
+  Set<String> names = <String>{};
+
+  for (final record in _records.values) {
+    for (final crop in record.crops) {
+      names.add(crop.name.toLowerCase());
+    }
+  }
+
+  List<String> sortedNames = names.toList();
+  sortedNames.sort();
+
+  return List<String>.unmodifiable(sortedNames);
+}
+~~~
+
+¿Qué ocurre en cada método?
+
+- `remove` pide al mapa que elimine una clave. Devuelve `false` si no existía.
+- `listRecords` crea una **lista nueva** y ordena esa lista, sin exponer el mapa privado.
+- `uniqueCropNames` **deriva** los nombres distintos a partir de las observaciones: no mantiene una colección secundaria que podría quedar desactualizada.
+
+**Importante:** `List.unmodifiable` no duplica cada objeto `AgriculturalRecord`, pero este diseño utiliza registros con campos `final` y listas de cultivos protegidas. En el modelo de esta práctica, eso evita modificaciones directas de los registros consultados.
+
+### 6. Probar un catálogo con varios registros
+
+Utiliza estas observaciones ficticias:
+
+~~~dart
+AgriculturalRecord first = AgriculturalRecord(
+  municipality: 'Andes',
+  year: 2025,
+  crops: [
+    CropArea(name: 'Coffee', plantedArea: 125.0),
+    CropArea(name: 'Plantain', plantedArea: 75.0),
+  ],
+);
+
+AgriculturalRecord second = AgriculturalRecord(
+  municipality: 'Andes',
+  year: 2024,
+  crops: [
+    CropArea(name: 'Coffee', plantedArea: 110.0),
+    CropArea(name: 'Beans', plantedArea: 40.0),
+  ],
+);
+
+AgriculturalRecord third = AgriculturalRecord(
+  municipality: 'La Mesa',
+  year: 2025,
+  crops: [
+    CropArea(name: 'Cocoa', plantedArea: 20.0),
+    CropArea(name: 'Plantain', plantedArea: 30.0),
+  ],
+);
+~~~
+
+Incorpora las tres instancias a un catálogo y comprueba:
+
+| Consulta | Resultado esperado |
+|---|---|
+| `catalog.count` | 3 |
+| `catalog.find('andes', 2025)` | Encuentra el primer registro |
+| `catalog.find('Andes', 2023)` | `null` |
+| `catalog.uniqueCropNames` | beans, cocoa, coffee, plantain |
+| `catalog.remove('Andes', 2024)` | `true` la primera vez |
+| `catalog.remove('Andes', 2024)` | `false` después |
+| Cantidad tras eliminar | 2 |
+
+**Nota:** aquí hay cuatro nombres únicos, porque no se incluyó `Avocado` en las observaciones de ejemplo de esta práctica. No reutilices por error la expectativa de cinco nombres únicos del Laboratorio 03: los datos de prueba son distintos.
+
+### 7. No mezclar la terminal con los modelos
+
+Ninguno de los tres objetos necesita saber cómo se recibe una entrada con `stdin` o cómo se imprime un menú. La consola será una **capa de interacción** que crea objetos y llama a sus métodos.
+
+Esto reduce el acoplamiento: podrás usar las mismas clases desde una aplicación Flutter en una etapa posterior, con una organización modular.
+
+### Laboratorio de errores — Un método con demasiadas tareas
+
+Imagina que `ObservationCatalog.add` además de guardar un registro pidiera por terminal el municipio, preguntara las áreas y mostrara un reporte. ¿Cómo comprobarías `add` desde otro programa? ¿Por qué dificultaría reutilizarlo en Flutter?
+
+**Refactoriza mentalmente:** separa la lectura (`bin/`), la construcción (`AgriculturalRecord`) y la operación de almacenamiento (`ObservationCatalog`).
+
+### Reto — Consultas sin acceso al mapa interno
+
+Implementa en `main()` un catálogo con tres observaciones; agrega dos veces la misma clave para comprobar duplicados, consulta una existente y otra inexistente, enumera las observaciones, muestra nombres únicos y elimina una de ellas. Haz todo con los **métodos públicos**, sin consultar directamente `_records`.
+
+### Comprobación
+
+¿Por qué `ObservationCatalog` administra varias observaciones y `AgriculturalRecord` solo representa una? ¿Por qué `find` devuelve un objeto nullable? ¿Qué ventaja ofrece calcular el conjunto de nombres únicos a partir de los registros existentes?
+
+---
+
