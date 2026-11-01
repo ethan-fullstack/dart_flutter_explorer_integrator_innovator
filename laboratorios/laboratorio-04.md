@@ -72,6 +72,12 @@ El código, los identificadores, los nombres de archivo y los comentarios se esc
 
 ---
 
+### Organización del trabajo en GitHub
+
+Desde este laboratorio, utiliza **un único repositorio individual y acumulativo** para toda la ruta. Guarda este proyecto en `lab-04/dart_lab_04/`; conserva `lab-01/` y las demás carpetas anteriores cuando existan. Ejecuta `dart create -t console dart_lab_04` desde `lab-04/`, y ejecuta `dart run`, `dart analyze` y las instrucciones de cada práctica desde la raíz de `dart_lab_04/`.
+
+La estructura anterior es la del **repositorio personal de desarrollo**, no la del repositorio que aloja las guías. Después de terminar, actualiza el README principal con el estado, las instrucciones de ejecución y los cambios de las versiones anteriores. Registra commits significativos, sin una cantidad mínima artificial. Cada laboratorio requiere también un **informe PDF obligatorio** como segunda evidencia; se prepara para la entrega, sin reducir las horas de programación.
+
 ## Práctica 4.1 — Clases, objetos y métodos de instancia (35 min)
 
 ### Objetivos
@@ -1730,9 +1736,72 @@ No añadas todavía `extends`, `implements`, serialización JSON ni archivos. So
 
 ## Entrega y autoevaluación
 
-El archivo principal es `bin/agricultural_catalog_oop.dart`. Conserva también los ejemplos de las prácticas `practice_41.dart` a `practice_45.dart` y las correcciones de tus ejercicios.
+La entrega de este laboratorio consta de **dos evidencias obligatorias**: un repositorio individual acumulativo en GitHub y un **informe PDF**. El código debe poder ejecutarse y verificarse; el PDF explica sus resultados y decisiones.
 
-No necesitas preparar un informe extenso ni una colección de capturas para demostrar cada concepto. El resultado principal es un programa ejecutable, comprensible y comprobado.
+### Evidencia 1 — GitHub
+
+- Utilizar el **mismo repositorio individual** desde el Laboratorio 01; conservar las carpetas de los laboratorios anteriores sin sobrescribir sus versiones.
+- Agregar la carpeta `lab-04/dart_lab_04/`, con el proyecto Dart, su configuración y los archivos de ejercicios desarrollados.
+- Incluir como producto principal bin/agricultural_catalog_oop.dart y conservar los demás archivos correspondientes a las prácticas de este laboratorio.
+- Implementar y demostrar: Clases `CropArea`, `AgriculturalRecord`, `ObservationCatalog`, constructores, encapsulamiento, getters, composición, búsquedas y eliminación; pruebas A–N.
+- Registrar **commits significativos** que evidencien implementación, mejoras, depuración y correcciones reales, sin exigir un número fijo.
+- Actualizar el **README principal** con el estado y las instrucciones de ejecución de los laboratorios 01 al 04, así como las funcionalidades incorporadas.
+- Evitar subir credenciales, archivos temporales o resultados generados innecesarios.
+
+### Evidencia 2 — Informe PDF
+
+El documento debe incluir:
+
+1. Identificación de la persona que desarrolla, número del laboratorio y enlace al repositorio individual.
+2. Descripción de las nuevas funcionalidades de catálogo agrícola orientado a objetos y de sus archivos principales.
+3. Decisiones técnicas justificadas: modelado de clases, composición, encapsulamiento y protección del estado.
+4. Resultados de las pruebas y verificaciones: casos probados, resultados esperados y observados, errores y correcciones.
+5. Seguimiento de GitHub y evolución del sistema: commits representativos y cambios progresivos. Comparar el mapa anidado del 03 con objetos y responsabilidades delimitadas en el 04.
+6. Respuestas argumentadas a las cinco situaciones de análisis siguientes.
+
+El PDF no necesita una extensión fija ni capturas de cada instrucción; **sí debe explicar y respaldar el trabajo con evidencias concretas** de código, resultados y commits. Su preparación es parte de la entrega posterior a la sesión práctica de 4,5 horas.
+
+### Preguntas de análisis
+
+Responde **estas cinco preguntas en el PDF**. En cada caso explica cómo identificarías el problema, qué cambio aplicarías con los conceptos del laboratorio y cómo verificarías que funciona.
+
+**1. ¿Qué harías si se crea un cultivo con nombre vacío o superficie negativa?**
+
+Explica la validación del constructor y cómo comprobar que el objeto inválido no se construya.
+
+**2. ¿Qué harías si otra clase cambia libremente el total de una observación?**
+
+Justifica encapsulamiento, getter calculado y operaciones controladas.
+
+**3. ¿Qué harías si alguien modifica la lista original y cambian las áreas de una observación ya creada?**
+
+Explica la copia no modificable y qué límites tiene una copia superficial.
+
+**4. ¿Qué harías si dos observaciones del mismo municipio y año se guardan como registros diferentes?**
+
+Describe normalización de claves y validación de duplicados en `ObservationCatalog`.
+
+**5. ¿Qué harías si las clases de dominio también solicitan entradas e imprimen menús?**
+
+Explica la separación de responsabilidades y cómo comprobar modelos sin usar consola.
+
+### Preguntas de repaso (opcionales)
+
+Las siguientes preguntas originales sirven para estudiar; **no sustituyen** las cinco preguntas de análisis exigidas en el PDF.
+
+1. ¿En qué se diferencia un mapa que contiene datos de una clase que representa un concepto?
+2. ¿Qué diferencia hay entre una clase y una instancia?
+3. ¿Qué ventaja ofrece un constructor con parámetros obligatorios?
+4. ¿Por qué un método puede utilizar atributos del objeto sin recibirlos todos como argumentos?
+5. ¿Cuándo elegirías un getter calculado?
+6. ¿Por qué no conviene utilizar setters para todos los atributos?
+7. ¿Qué significa que un identificador con guion bajo sea privado a la biblioteca?
+8. ¿Por qué `AgriculturalRecord` tiene una lista de `CropArea`?
+9. ¿Qué sucede si dos variables comparten una lista mutable?
+10. ¿Qué operación debe rechazar una observación duplicada?
+11. ¿Por qué `ObservationCatalog.find` devuelve `AgriculturalRecord?`?
+12. ¿Qué responsabilidades tendrías que separar antes de reutilizar estas clases en Flutter?
+13. ¿Qué limitación conserva el programa al cerrar la terminal?
 
 ### Lista de comprobación
 
@@ -1751,25 +1820,13 @@ No necesitas preparar un informe extenso ni una colección de capturas para demo
 - [ ] Verifiqué los casos A–N, incluidos errores de entrada y referencias compartidas.
 - [ ] Corregí los errores intencionales antes de ejecutar el análisis estático.
 
-### Preguntas para explicar tu solución
-
-1. ¿En qué se diferencia un mapa que contiene datos de una clase que representa un concepto?
-2. ¿Qué diferencia hay entre una clase y una instancia?
-3. ¿Qué ventaja ofrece un constructor con parámetros obligatorios?
-4. ¿Por qué un método puede utilizar atributos del objeto sin recibirlos todos como argumentos?
-5. ¿Cuándo elegirías un getter calculado?
-6. ¿Por qué no conviene utilizar setters para todos los atributos?
-7. ¿Qué significa que un identificador con guion bajo sea privado a la biblioteca?
-8. ¿Por qué `AgriculturalRecord` tiene una lista de `CropArea`?
-9. ¿Qué sucede si dos variables comparten una lista mutable?
-10. ¿Qué operación debe rechazar una observación duplicada?
-11. ¿Por qué `ObservationCatalog.find` devuelve `AgriculturalRecord?`?
-12. ¿Qué responsabilidades tendrías que separar antes de reutilizar estas clases en Flutter?
-13. ¿Qué limitación conserva el programa al cerrar la terminal?
-
 ### Criterios de finalización
 
 El laboratorio está completo cuando puedes ejecutar el catálogo orientado a objetos, explicar las responsabilidades de cada clase, registrar y consultar varias observaciones, demostrar que no se sobrescriben duplicados ni se comparten listas de manera accidental y reproducir las pruebas manuales. **Una sola ejecución favorable no es suficiente** para demostrar comprensión.
+
+### Condiciones de entrega
+
+**Adjunta el informe PDF y proporciona el enlace al repositorio individual de GitHub.** El repositorio debe permitir revisar las versiones acumuladas desde el Laboratorio 01, los commits y las instrucciones para ejecutar el proyecto actual. El informe debe justificar las decisiones técnicas, presentar resultados de verificación y analizar la evolución de la aplicación.
 
 ## Continuidad — Laboratorio 05
 
