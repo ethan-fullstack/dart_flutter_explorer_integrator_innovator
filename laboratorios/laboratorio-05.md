@@ -18,9 +18,7 @@ Los registros agrícolas de los ejemplos son ficticios. Se trabaja con archivos 
 | 5.4 | JSON, modelos tipados y archivos locales | 45 min |
 | 5.5 | Pruebas unitarias y casos límite | 40 min |
 | 5.6 | Reto integrador: procesador agrícola con JSON | 65 min |
-| **Total** | | **270 min (4,5 horas)** |
-
-### Objetivos
+| **Total** | | **270 min (4,5 h)** |
 
 Al finalizar podrás:
 
@@ -622,8 +620,6 @@ Cambia temporalmente la importación a un nombre de paquete inexistente y ejecut
 
 ## Práctica 5.4 — JSON, modelos tipados y archivos locales (45 min)
 
-### Objetivos
-
 Comprender la diferencia entre texto JSON, colecciones decodificadas y objetos de dominio; validar la estructura de los datos antes de utilizarlos; y guardar una copia exportada sin modificar el archivo de entrada.
 
 ### 1. JSON no es un objeto de Dart
@@ -748,7 +744,7 @@ class AgriculturalRecord {
 }
 ~~~
 
-El constructor comprueba las reglas **del escenario didáctico**. Usa `List<CropArea>.unmodifiable` para que el código exterior no pueda agregar o quitar cultivos de una observación ya construida, ni alterar directamente la lista recibida. Esto evita que una modificación externa invalide las reglas del modelo.
+El constructor comprueba las reglas **del escenario**. Usa `List<CropArea>.unmodifiable` para que el código exterior no pueda agregar o quitar cultivos de una observación ya construida, ni alterar directamente la lista recibida. Esto evita que una modificación externa invalide las reglas del modelo.
 
 **Detalle matemático:** los valores individuales pueden ser finitos y, aun así, una suma extremadamente grande podría desbordarse. Por eso se comprueba también `totalArea.isFinite`.
 
@@ -927,7 +923,7 @@ outputFile.writeAsStringSync(normalizedJson);
 print('Normalized file written: ' + outputFile.path);
 ~~~
 
-Los archivos se usan de modo **síncrono**, aceptable para una pequeña herramienta didáctica de consola con datos locales. La API de `File` también permite lectura y escritura **asíncronas**; aprenderás a esperar esas operaciones en el Laboratorio 06.
+Los archivos se usan de modo **síncrono**, aceptable para una pequeña herramienta de consola con datos locales. La API de `File` también permite lectura y escritura **asíncronas**; aprenderás a esperar esas operaciones en el Laboratorio 06.
 
 **Precaución:** el programa escribe siempre `normalized_observations.json`, no el archivo de entrada. Aunque la codificación se haga correctamente, sobrescribir el archivo de origen sin una copia sería un riesgo innecesario. La escritura hacia el archivo de salida reemplaza su contenido si ya existe; usa una ruta dedicada al resultado.
 
@@ -955,8 +951,6 @@ Implementa un pequeño programa que lea el archivo ficticio, muestre municipio, 
 ---
 
 ## Práctica 5.5 — Pruebas automatizadas y casos límite (40 min)
-
-### Objetivos
 
 Comprobar reglas sin depender de la terminal ni del sistema de archivos y entender qué detecta una prueba que el analizador no puede detectar.
 
@@ -1200,7 +1194,7 @@ La aplicación utiliza archivos JSON locales y `package:test` como dependencia d
 
 ### Reglas del escenario
 
-El archivo utiliza el esquema didáctico definido en la práctica 5.4:
+El archivo utiliza el esquema definido en la práctica 5.4:
 
 ~~~json
 [
