@@ -2,15 +2,15 @@
 
 En el [Laboratorio 01](laboratorio-01.md) construiste una ficha de observación agrícola que recibía nombres y áreas, calculaba totales y mostraba porcentajes. El programa funcionaba con entradas correctas, pero se interrumpía cuando alguien escribía letras donde esperaba un número. Además, las instrucciones para leer cada cultivo estaban repetidas.
 
-En este laboratorio aprenderás a **tomar decisiones, repetir instrucciones y validar entradas**. Al final desarrollarás un explorador de consola capaz de registrar entre uno y cinco cultivos, conservar el último resumen durante la ejecución y mostrar qué cultivo tiene la mayor participación en el área ingresada.
+El explorador de consola incorporará condiciones, ciclos y validación de entradas. Podrá registrar entre uno y cinco cultivos, conservar el último resumen y calcular la participación del cultivo con mayor superficie.
 
-No necesitas conocimientos previos de Java, Python ni Flutter. La única base necesaria es el Laboratorio 01: variables, operaciones, funciones elementales y entrada por terminal.
+Se retoman las variables, operaciones, funciones y lectura por terminal trabajadas en el Laboratorio 01.
 
-> **Contexto del proyecto:** los municipios, cultivos y superficies utilizados aquí son **datos ficticios para aprender programación**. La proporción del cultivo con mayor área es un cálculo descriptivo sobre lo que se ingresó; no mide por sí sola riesgos, sostenibilidad, productividad ni diversificación agrícola real.
+Las observaciones agrícolas de los ejemplos son ficticias. La participación de un cultivo describe su proporción de superficie en los datos ingresados, no su productividad ni su sostenibilidad.
 
 ## Ruta del laboratorio
 
-| Práctica | Aprendizaje principal | Tiempo efectivo |
+| Práctica | Aprendizaje principal | Duración |
 |---|---|---:|
 | 2.1 | Comparaciones, valores booleanos y operadores lógicos | 35 min |
 | 2.2 | Decisiones: `if`, `else if` y `else` | 40 min |
@@ -18,9 +18,7 @@ No necesitas conocimientos previos de Java, Python ni Flutter. La única base ne
 | 2.4 | Repetición con `for`, contadores, acumuladores y máximos | 40 min |
 | 2.5 | `while`, `do while` y validación segura de entradas | 45 min |
 | 2.6 | Reto integrador: explorador agrícola interactivo | 70 min |
-| **Total** | **Prácticas, retos, depuración y comprobación** | **270 min (4,5 h)** |
-
-La duración es para trabajo práctico; la instalación del entorno se realiza antes.
+| **Total** | | **270 min (4,5 h)** |
 
 ### Objetivos
 
@@ -66,9 +64,9 @@ Los archivos de prácticas se crearán progresivamente. Para ejecutar uno espec�
 dart run bin/practice_21.dart
 ~~~
 
-Los identificadores, mensajes y comentarios **dentro del código** están en inglés. Las explicaciones se presentan en español. En cada práctica: **predice, ejecuta, modifica, depura y comprueba**.
+Los identificadores y mensajes del código están en inglés. Antes de modificar cada ejemplo, anticipa su resultado y compruébalo al ejecutarlo.
 
-La ruta principal utiliza Dart en una terminal: los ejercicios con `dart:io` y `stdin.readLineSync()` no funcionan de la misma manera en DartPad.
+Los ejercicios con `dart:io` y `stdin.readLineSync()` requieren una terminal con Dart instalado; no pueden ejecutarse en DartPad como programas de consola.
 
 ---
 
@@ -393,7 +391,7 @@ void main() {
 
 Antes de ejecutar, predice qué se muestra para `2`. Prueba después `1`, `0` y `9`.
 
-**En Dart 3**, los casos no vacíos de un `switch` de instrucciones terminan al ejecutar su cuerpo. **No necesitas agregar `break` tras cada caso**. La sintaxis antigua de otros lenguajes no debe copiarse automáticamente.
+En Dart 3, los casos no vacíos de un `switch` de instrucciones terminan al ejecutar su cuerpo, sin añadir `break` al final de cada caso.
 
 ### 2. Elegir la estructura correcta
 
@@ -1006,7 +1004,7 @@ El programa debe permitir:
 
 **Política de empate:** si dos cultivos tienen la misma área máxima, conserva el **primero ingresado**. Para eso la actualización del máximo utiliza `>` y no `>=`.
 
-**Límites didácticos:** el año debe estar entre `2000` y `2100`. No son límites institucionales ni una validación de datos oficiales.
+El rango de años de `2000` a `2100` es una condición del ejercicio, no un límite tomado de una fuente de datos.
 
 ### Ejemplo de uso
 
@@ -1211,7 +1209,7 @@ Muestra nombre del municipio, año, cantidad de cultivos, superficie total, prom
 
 **La consulta no debe solicitar entradas adicionales:** todos esos resultados se derivan de las variables de resumen.
 
-### Etapa 6 — Pruebas obligatorias (10 min)
+### Etapa 6 — Casos de prueba (10 min)
 
 | Caso | Secuencia | Comportamiento esperado |
 |---|---|---|
@@ -1250,11 +1248,11 @@ En **copias temporales** introduce y corrige:
 
 Después de cada experimento restaura la versión correcta.
 
-### Reto obligatorio — Venta de entradas de cine
+### Reto de aplicación — Venta de entradas de cine
 
-**Enunciado.** Un cine pequeño necesita un sistema de consola para vender entradas de una sala con 40 asientos. Existen entradas generales de 18 000 pesos y entradas para estudiantes de 12 000 pesos. El sistema debe administrar las ventas sin permitir que se exceda la capacidad de la sala.
+Un cine pequeño necesita un sistema de consola para vender entradas de una sala con 40 asientos. Existen entradas generales de 18 000 pesos y entradas para estudiantes de 12 000 pesos. El sistema debe administrar las ventas sin permitir que se exceda la capacidad de la sala.
 
-**Requisitos**
+El programa debe:
 
 - Mantener un menú que permita vender entradas, consultar el resumen de ventas y salir.
 - En cada venta, solicitar el tipo de entrada y la cantidad de asientos que se desean comprar.
