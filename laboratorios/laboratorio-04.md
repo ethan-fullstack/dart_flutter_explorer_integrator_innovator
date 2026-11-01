@@ -20,8 +20,6 @@ Los datos agrícolas de los ejemplos son ficticios. Las proporciones calculadas 
 | 4.6 | Reto integrador: AgroDiversa orientada a objetos | 70 min |
 | **Total** | | **270 min (4,5 h)** |
 
-### Objetivos
-
 - Explicar la diferencia entre **clase**, **objeto**, **atributo**, **método**, **instancia** y **constructor**.
 - Crear varios objetos de una clase y comprobar que cada uno conserva su propio estado.
 - Utilizar constructores con parámetros posicionales y nombrados, así como `this`.
@@ -71,8 +69,6 @@ Los identificadores y mensajes del código están en inglés. Ejecuta los ejempl
 ---
 
 ## Práctica 4.1 — Clases, objetos y métodos de instancia (35 min)
-
-### Objetivos
 
 Diferenciar un grupo de datos anónimos de un objeto con identidad conceptual y comportamiento; crear objetos independientes y reconocer el propósito de los métodos.
 
@@ -277,8 +273,6 @@ Construye una clase `CropArea` con un nombre, una superficie y dos métodos: `de
 
 ## Práctica 4.2 — Constructores, `this` y propiedades calculadas (40 min)
 
-### Objetivos
-
 Crear objetos con datos desde el primer momento, evitar estados incompletos, utilizar parámetros nombrados y conocer los getters.
 
 ### 1. El problema de un objeto a medio llenar
@@ -418,7 +412,7 @@ void main() {
 }
 ~~~
 
-`CropArea.example()` es un **constructor nombrado**, útil aquí para crear un ejemplo didáctico. No es todavía una función que consulta un archivo o una API.
+`CropArea.example()` es un **constructor nombrado**, útil aquí para crear un ejemplo. No es todavía una función que consulta un archivo o una API.
 
 **Ejercicio:** crea `CropArea.emptyExample()` con un nombre de prueba y una superficie de `1.0`. Explica por qué no conviene usar un constructor de ejemplos en la capa que procesa datos oficiales.
 
@@ -496,8 +490,6 @@ Agrega un constructor nombrado `CropArea.example()` con datos de ejemplo.
 ---
 
 ## Práctica 4.3 — Encapsulamiento y reglas de un objeto (45 min)
-
-### Objetivos
 
 Comprender por qué no se debe permitir cualquier modificación de estado y cómo ocultar detalles internos detrás de operaciones comprensibles.
 
@@ -774,8 +766,6 @@ Prueba dos contadores diferentes: actualizar uno no debe modificar el otro.
 ---
 
 ## Práctica 4.4 — Composición: una observación contiene cultivos (40 min)
-
-### Objetivos
 
 Representar relaciones entre objetos, almacenar una colección dentro de otro objeto, calcular propiedades a partir de esa colección y evitar que una modificación externa altere accidentalmente el estado.
 
@@ -1079,7 +1069,7 @@ void main() {
 Este modelo incluye decisiones de dominio deliberadamente sencillas:
 
 - El municipio no está vacío.
-- El año debe estar entre `2000` y `2100` **por regla didáctica**.
+- El año debe estar entre `2000` y `2100` **por regla del ejercicio**.
 - Debe existir por lo menos un cultivo.
 - Cada cultivo tiene un nombre no vacío y una superficie positiva y finita.
 - Los nombres no pueden repetirse dentro de la observación después de normalizar mayúsculas y espacios exteriores.
@@ -1120,8 +1110,6 @@ Construye dos `AgriculturalRecord` con municipios o años diferentes. Comprueba 
 ---
 
 ## Práctica 4.5 — Colaboración: un catálogo administra observaciones (40 min)
-
-### Objetivos
 
 Separar un registro individual del conjunto de registros; utilizar un mapa interno para búsquedas eficientes; exponer operaciones de catálogo sin entregar su colección interna para modificaciones arbitrarias.
 
@@ -1398,7 +1386,7 @@ Tu aplicación debe:
 Option:
 ~~~
 
-### Datos ficticios para verificar
+### Datos de prueba
 
 Utiliza posteriormente estas observaciones:
 
