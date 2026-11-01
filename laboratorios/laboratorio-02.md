@@ -1250,6 +1250,17 @@ En **copias temporales** introduce y corrige:
 
 Después de cada experimento restaura la versión correcta.
 
-### Ampliación opcional (fuera de las 4,5 horas)
+### Reto obligatorio — Venta de entradas de cine
 
-Agrega una opción que muestre únicamente el nombre del cultivo predominante y su participación, o conserva la cantidad total de observaciones **completas** registradas durante la sesión. No utilices todavía `List`, `Set`, `Map` ni clases.
+**Enunciado.** Un cine pequeño necesita un sistema de consola para vender entradas de una sala con 40 asientos. Existen entradas generales de 18 000 pesos y entradas para estudiantes de 12 000 pesos. El sistema debe administrar las ventas sin permitir que se exceda la capacidad de la sala.
+
+**Requisitos**
+
+- Mantener un menú que permita vender entradas, consultar el resumen de ventas y salir.
+- En cada venta, solicitar el tipo de entrada y la cantidad de asientos que se desean comprar.
+- Rechazar opciones desconocidas, cantidades que no sean enteros positivos, datos no numéricos y ventas que superen los asientos disponibles; permitir corregir la entrada sin cerrar el programa.
+- Descontar asientos y sumar ingresos **solo** después de aceptar una venta completa.
+- Acumular la cantidad de entradas vendidas por tipo y el dinero recaudado en total.
+- Mostrar en el resumen la capacidad inicial, los asientos vendidos, los disponibles, las ventas por tipo y la recaudación.
+- Cuando se agoten los asientos, rechazar nuevas compras sin impedir la consulta del resumen ni la salida.
+- Resolver el problema mediante variables, funciones, condiciones y ciclos, sin utilizar colecciones ni clases.
