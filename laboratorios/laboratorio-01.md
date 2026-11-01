@@ -982,10 +982,6 @@ En una **copia temporal** del programa, introduce y corrige estas tres fallas de
 
 No dejes fallos intencionales en la versión final.
 
-### Ampliación opcional (fuera de las 4,5 horas)
-
-Permite elegir un nombre para el informe, agrega una cuarta superficie o calcula el área no correspondiente al primer cultivo (total menos primer cultivo). Resuelve la ampliación con los conceptos ya conocidos, sin adelantar decisiones ni colecciones.
-
 ### Si trabajas en DartPad
 
 Puedes construir una **variante de datos fijos** sin `import 'dart:io';`, sustituyendo las lecturas dentro de `main()` por declaraciones como estas:
@@ -1005,3 +1001,17 @@ double thirdArea = 50.0;
 ~~~
 
 Conserva las mismas funciones y cálculos. Esta variante te permite estudiar el procesamiento, pero **no sustituye la comprobación de entrada por terminal** cuando dispongas del SDK.
+
+### Reto obligatorio — Presupuesto de una excursión
+
+**Enunciado.** Una empresa de turismo necesita un programa de consola que prepare el presupuesto de una excursión para un grupo de personas. El programa debe calcular los costos del viaje y presentar cuánto corresponde pagar por persona.
+
+**Requisitos**
+
+- Solicitar el destino, la cantidad de viajeros, los días de viaje, las noches de alojamiento, el costo total de transporte, el costo de alojamiento por noche para todo el grupo y el costo diario de alimentación por persona.
+- Calcular el costo total del alojamiento, el costo total de alimentación del grupo y el presupuesto general de la excursión.
+- Calcular cuánto debe pagar cada viajero cuando los costos se distribuyen por partes iguales.
+- Mostrar qué porcentaje del presupuesto general corresponde al transporte.
+- Presentar un informe con el destino, las cantidades ingresadas, el desglose de costos, el total y el valor por persona; expresar los importes y el porcentaje con dos decimales.
+- Utilizar funciones que devuelvan resultados y mantener separados los cálculos de la presentación.
+- Para este reto se asumen entradas numéricas válidas, al menos un viajero, al menos un día de viaje y una cantidad de noches no negativa. El programa no debe necesitar decisiones, ciclos, colecciones ni clases.
