@@ -2,15 +2,15 @@
 
 En el [Laboratorio 03](laboratorio-03.md) construiste un catálogo agrícola utilizando funciones, listas, conjuntos y mapas anidados. Pudiste registrar municipios, años y cultivos, pero surgió una dificultad: **una colección por sí sola no explica qué representa cada dato ni qué operaciones deben permitirse**.
 
-En este laboratorio aprenderás **programación orientada a objetos (POO) desde sus fundamentos**. Primero crearás clases pequeñas y después transformarás el catálogo de AgroDiversa en un programa organizado mediante objetos. En el [Laboratorio 05](laboratorio-05.md) ampliarás lo aprendido con herencia, interfaces, polimorfismo, JSON y pruebas automatizadas.
+El catálogo agrícola se reorganizará mediante clases, objetos, constructores y encapsulamiento. El [Laboratorio 05](laboratorio-05.md) amplía estos conceptos con herencia, interfaces, JSON y pruebas automatizadas.
 
-**No necesitas haber programado en otros lenguajes.** Solo se requieren los conocimientos de los laboratorios 01 a 03: variables, funciones, decisiones, bucles y colecciones.
+Se retomarán las variables, funciones, condiciones, ciclos y colecciones de los laboratorios 01 a 03.
 
-> **Alcance de los datos:** los municipios, cultivos, años y superficies de todos los ejemplos son **ficticios**. Las proporciones calculadas solo describen los valores introducidos; no son estadísticas oficiales ni permiten concluir riesgos, productividad, diversidad o sostenibilidad agrícolas.
+Los datos agrícolas de los ejemplos son ficticios. Las proporciones calculadas describen las superficies ingresadas y no son estadísticas oficiales.
 
 ## Plan de trabajo
 
-| Práctica | Tema central | Tiempo efectivo |
+| Práctica | Tema central | Duración |
 |---|---|---:|
 | 4.1 | Clases, objetos, atributos y métodos de instancia | 35 min |
 | 4.2 | Constructores, parámetros nombrados, `this` y getters | 40 min |
@@ -18,11 +18,9 @@ En este laboratorio aprenderás **programación orientada a objetos (POO) desde 
 | 4.4 | Composición: una observación contiene cultivos | 40 min |
 | 4.5 | Colaboración entre objetos: catálogo y búsqueda | 40 min |
 | 4.6 | Reto integrador: AgroDiversa orientada a objetos | 70 min |
-| **Total** | **Lectura activa, ejecución, ejercicios y comprobaciones** | **270 min (4,5 h)** |
+| **Total** | | **270 min (4,5 h)** |
 
-La preparación e instalación del SDK no forman parte de los 270 minutos. Los tiempos son objetivos de planificación, no sustituyen la comprobación práctica del laboratorio.
-
-### Al finalizar podrás
+### Objetivos
 
 - Explicar la diferencia entre **clase**, **objeto**, **atributo**, **método**, **instancia** y **constructor**.
 - Crear varios objetos de una clase y comprobar que cada uno conserva su propio estado.
@@ -68,7 +66,7 @@ dart run bin/practice_41.dart
 
 Para mantener el alcance del laboratorio, los ejercicios se pueden resolver en un solo archivo por práctica. **La separación en bibliotecas, interfaces y módulos de producción se profundizará en el Laboratorio 05**.
 
-El código, los identificadores, los nombres de archivo y los comentarios se escriben **en inglés**; las explicaciones están en español. Ejecuta cada ejemplo, haz una predicción antes de modificarlo y corrige los errores intencionales antes de continuar.
+Los identificadores y mensajes del código están en inglés. Ejecuta los ejemplos y comprueba los cambios que realices.
 
 ---
 
@@ -489,7 +487,7 @@ Corrige la llamada sin eliminar `required` ni sustituir `double` por un tipo má
 
 Escribe una clase `CropArea` con parámetros nombrados obligatorios, normalización del nombre, un getter `areaInSquareMeters` y un método `describe()`. Crea tres objetos con áreas `1.0`, `2.5` y `3.0`. Muestra sus superficies en hectáreas y metros cuadrados.
 
-**Ampliación voluntaria:** agrega un constructor nombrado `CropArea.example()` con datos ficticios. No es necesario para completar el reto.
+Agrega un constructor nombrado `CropArea.example()` con datos de ejemplo.
 
 ### Comprobación
 
@@ -1090,7 +1088,7 @@ Este modelo incluye decisiones de dominio deliberadamente sencillas:
 
 El recorrido `crops.skip(1)` omite el primer elemento porque ya se utilizó para inicializar `largest`. Así se compara con los restantes y se conserva el primero en caso de empate.
 
-**No cambies estas reglas por categorías agrícolas externas sin evidencia.** El propósito es comprender constructores, composición e invariantes. En el Laboratorio 05 profundizarás en los tipos de excepción y en las pruebas automáticas.
+Estas reglas pertenecen al ejercicio. El Laboratorio 05 abordará su tratamiento con excepciones y pruebas automáticas.
 
 ### 7. Comprueba los datos originales
 
@@ -1720,11 +1718,11 @@ dart run bin/agricultural_catalog_oop.dart
 
 El formateador y el analizador no sustituyen las pruebas de comportamiento y las verificaciones numéricas. Las pruebas automatizadas llegarán en el Laboratorio 05.
 
-### Reto obligatorio — Sistema de alquiler de bicicletas
+### Reto de aplicación — Sistema de alquiler de bicicletas
 
-**Enunciado.** Un negocio de alquiler de bicicletas necesita una aplicación de consola para administrar sus bicicletas y los alquileres activos y finalizados. Cada bicicleta tiene un identificador, una descripción y una tarifa por hora. El sistema debe impedir que una bicicleta se alquile simultáneamente a dos personas.
+Un negocio de alquiler de bicicletas necesita una aplicación de consola para administrar sus bicicletas y los alquileres activos y finalizados. Cada bicicleta tiene un identificador, una descripción y una tarifa por hora. El sistema debe impedir que una bicicleta se alquile simultáneamente a dos personas.
 
-**Requisitos**
+El programa debe:
 
 - Modelar mediante clases los conceptos de bicicleta, alquiler y administración de alquileres, con constructores y responsabilidades diferenciadas.
 - Registrar bicicletas con identificadores únicos, descripciones no vacías y tarifas por hora positivas y finitas.
