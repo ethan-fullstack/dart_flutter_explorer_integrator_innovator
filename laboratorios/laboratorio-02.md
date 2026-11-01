@@ -20,8 +20,6 @@ Las observaciones agrícolas de los ejemplos son ficticias. La participación de
 | 2.6 | Reto integrador: explorador agrícola interactivo | 70 min |
 | **Total** | | **270 min (4,5 h)** |
 
-### Objetivos
-
 Al finalizar podrás:
 
 - Distinguir la asignación de una comparación y obtener resultados `bool`.
@@ -71,8 +69,6 @@ Los ejercicios con `dart:io` y `stdin.readLineSync()` requieren una terminal con
 ---
 
 ## Práctica 2.1 — Comparaciones y lógica booleana (35 min)
-
-### Objetivos
 
 Reconocer comparaciones que devuelven `true` o `false` y combinar condiciones para formular reglas sencillas.
 
@@ -159,7 +155,7 @@ void main() {
 - `||` es verdadero cuando **al menos una** se cumple.
 - `!` invierte `true` y `false`.
 
-La condición `year >= 2000` es un **criterio inventado para practicar**, no una regla oficial sobre datos agrícolas.
+La condición `year >= 2000` es un **criterio inventado en este ejercicio**, no una regla oficial sobre datos agrícolas.
 
 ### Predicción — Tabla de verdad
 
@@ -217,8 +213,6 @@ Prueba cinco combinaciones, incluyendo un nombre formado por espacios, un área 
 ---
 
 ## Práctica 2.2 — Decisiones con `if`, `else if` y `else` (40 min)
-
-### Objetivos
 
 Ejecutar diferentes instrucciones según condiciones, ordenar correctamente los límites y evitar operaciones inválidas.
 
@@ -363,8 +357,6 @@ Prueba `-1`, `0`, `25`, `50`, `75`, `100` y `101`. Comprueba los límites sin ca
 ---
 
 ## Práctica 2.3 — Opciones conocidas con `switch` (40 min)
-
-### Objetivos
 
 Seleccionar entre comandos concretos, incorporar una rama para opciones desconocidas y separar decisiones de la lectura.
 
@@ -522,8 +514,6 @@ Crea una función que acepte los comandos de texto `'a'`, `'b'`, `'c'` y `'q'` y
 ---
 
 ## Práctica 2.4 — Ciclo `for`, contadores, acumuladores y máximos (40 min)
-
-### Objetivos
 
 Repetir una cantidad conocida de veces, calcular totales sin copiar instrucciones y conservar el mayor valor observado.
 
@@ -690,8 +680,6 @@ Solicita una cantidad de cultivos entre `1` y `5`. Para esta práctica puedes as
 ---
 
 ## Práctica 2.5 — Ciclos `while` y `do while`, y entradas seguras (45 min)
-
-### Objetivos
 
 Repetir una operación cuando no conoces la cantidad de intentos, convertir entradas sin excepciones por formato y terminar correctamente cuando finaliza la entrada estándar.
 
