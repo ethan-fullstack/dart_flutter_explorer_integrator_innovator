@@ -2,11 +2,11 @@
 
 En el [Laboratorio 02](laboratorio-02.md) creaste un explorador agrícola de consola capaz de validar datos, procesar varios cultivos y conservar el último resumen. Su principal limitación era que **no podía recordar múltiples observaciones ni consultar sus cultivos por separado**.
 
-En este laboratorio mejorarás las funciones y aprenderás a utilizar las tres colecciones principales de Dart: `List`, `Set` y `Map`. El reto integrador conservará distintas observaciones de municipio y año en memoria y permitirá recuperarlas, consultarlas y obtener un catálogo de cultivos únicos.
+El catálogo se ampliará con `List`, `Set` y `Map` para conservar observaciones de distintos municipios y años, consultarlas y obtener nombres de cultivos únicos.
 
-**No se requiere experiencia en otros lenguajes ni en Flutter.** Sí necesitas los fundamentos practicados en los laboratorios 01 y 02.
+Se utilizarán las variables, funciones, condiciones y ciclos de los laboratorios 01 y 02.
 
-> **Contexto:** las cifras, municipios y cultivos son **ejemplos ficticios**. Los indicadores de áreas son descripciones matemáticas de las entradas y no deben interpretarse como diagnósticos de diversidad, riesgo o sostenibilidad agrícolas.
+Los municipios, cultivos y superficies de los ejemplos son ficticios. Los cálculos no representan diagnósticos agrícolas.
 
 ## Plan de trabajo
 
@@ -18,9 +18,7 @@ En este laboratorio mejorarás las funciones y aprenderás a utilizar las tres c
 | 3.4 | `Map`: claves, valores, registros y anidación | 45 min |
 | 3.5 | Filtrar, transformar, ordenar y resumir colecciones | 35 min |
 | 3.6 | Reto integrador: catálogo de observaciones agrícolas | 80 min |
-| **Total** | **Trabajo práctico** | **270 min (4,5 horas)** |
-
-La instalación del entorno no está incluida. Estos tiempos incluyen la ejecución de ejemplos, ejercicios, depuración, retos y comprobaciones.
+| **Total** | | **270 min (4,5 horas)** |
 
 ### Objetivos
 
@@ -68,9 +66,7 @@ Para ejecutar el primer ejemplo desde la raíz del proyecto:
 dart run bin/practice_31.dart
 ~~~
 
-Los ejemplos, identificadores, mensajes, comentarios y nombres de archivos están en **inglés**. Las explicaciones están en español.
-
-**Método de estudio:** predice primero; luego ejecuta y modifica. Conserva los ejercicios resueltos y corrige los errores intencionales antes de avanzar.
+Los identificadores y mensajes del código están en inglés. Comprueba los ejemplos antes y después de modificarlos.
 
 ---
 
@@ -1311,7 +1307,7 @@ void showUniqueCrops(
 
 Reemplaza el `case 4` por `showUniqueCrops(observations);`. Este conjunto se calcula **sin eliminar entradas ni modificar los mapas originales**.
 
-### Pruebas manuales obligatorias
+### Casos de prueba
 
 | Caso | Acciones | Resultado esperado |
 |---|---|---|
@@ -1353,11 +1349,11 @@ Trabaja en una copia temporal y restaura la versión válida tras cada experimen
 5. **Resultado desactualizado:** guarda un total calculado y cambia después las áreas sin recalcularlo.
 6. **Modificación compartida:** modifica un mapa interior al que apuntan dos referencias y observa que el cambio afecta a ambas.
 
-### Reto obligatorio — Catálogo de libros de una biblioteca
+### Reto de aplicación — Catálogo de libros de una biblioteca
 
-**Enunciado.** Una biblioteca comunitaria quiere organizar su catálogo de libros mediante un programa de consola. Necesita conservar varios libros, localizarlos por un código único y obtener consultas sobre sus géneros y años de publicación.
+Una biblioteca comunitaria quiere organizar su catálogo de libros mediante un programa de consola. Necesita conservar varios libros, localizarlos por un código único y obtener consultas sobre sus géneros y años de publicación.
 
-**Requisitos**
+El programa debe:
 
 - Permitir registrar varios libros, cada uno con código único, título, género y año de publicación.
 - Impedir que un código ya registrado sobrescriba la información de otro libro.
