@@ -1,10 +1,10 @@
 # Laboratorio 05 — POO avanzada, manejo de datos, JSON y pruebas en Dart
 
-En el [Laboratorio 03](laboratorio-03.md) construiste un catálogo de observaciones agrícolas con `List`, `Set` y `Map`. La etapa siguiente de la ruta, el Laboratorio 04, está dedicada a clases, objetos, constructores, encapsulamiento y colaboración entre objetos.
+En el [Laboratorio 03](laboratorio-03.md) construiste un catálogo de observaciones agrícolas con `List`, `Set` y `Map`. Después, en el [Laboratorio 04](laboratorio-04.md), transformaste ese catálogo utilizando clases, objetos, constructores, encapsulamiento y composición de objetos.
 
 En este laboratorio aprenderás a **extender el diseño mediante interfaces, herencia y composición**, detectar datos inválidos con excepciones, organizar el código en módulos, convertir modelos tipados a JSON y probar el comportamiento automáticamente.
 
-> **Continuidad:** el Laboratorio 04 todavía no está publicado en este repositorio. El Laboratorio 05 mantiene la numeración acordada y contiene un recordatorio de clases, pero **no sustituye la enseñanza completa de POO básica**. Cuando el 04 esté disponible, estúdialo antes de este.
+> **Continuidad:** este laboratorio asume los fundamentos de POO desarrollados en el [Laboratorio 04](laboratorio-04.md). Incluye un recordatorio breve de clases, pero no reemplaza las prácticas de modelado y colaboración entre objetos del laboratorio anterior.
 
 > **Alcance:** los datos agrícolas son **ficticios y didácticos**. El laboratorio no consulta fuentes oficiales, no produce recomendaciones agronómicas y no utiliza HTTP ni asincronía; estos últimos temas corresponden al Laboratorio 06.
 
