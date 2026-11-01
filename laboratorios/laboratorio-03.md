@@ -1353,8 +1353,18 @@ Trabaja en una copia temporal y restaura la versión válida tras cada experimen
 5. **Resultado desactualizado:** guarda un total calculado y cambia después las áreas sin recalcularlo.
 6. **Modificación compartida:** modifica un mapa interior al que apuntan dos referencias y observa que el cambio afecta a ambas.
 
-### Ampliación opcional — Fuera de las 4,5 horas
+### Reto obligatorio — Catálogo de libros de una biblioteca
 
-Incorpora una opción para comparar cultivos comunes y distintos entre dos observaciones con `Set.intersection` y `Set.difference`, o muestra solo los cultivos que superen un umbral introducido por el usuario.
+**Enunciado.** Una biblioteca comunitaria quiere organizar su catálogo de libros mediante un programa de consola. Necesita conservar varios libros, localizarlos por un código único y obtener consultas sobre sus géneros y años de publicación.
 
-No avances todavía a clases, persistencia o APIs: esos temas tendrán laboratorios dedicados.
+**Requisitos**
+
+- Permitir registrar varios libros, cada uno con código único, título, género y año de publicación.
+- Impedir que un código ya registrado sobrescriba la información de otro libro.
+- Conservar los registros durante toda la sesión y permitir listar los libros registrados.
+- Permitir buscar un libro por su código e informar claramente cuando no exista.
+- Mostrar una relación de géneros **únicos**, sin perder los libros que pertenezcan al mismo género.
+- Calcular cuántos libros corresponden a cada género.
+- Permitir consultar los libros de un género y presentar sus títulos ordenados alfabéticamente.
+- Manejar un catálogo vacío, consultas sin resultados y nombres de género escritos con diferencias de mayúsculas o espacios exteriores.
+- Emplear `List`, `Set` y `Map` según sus responsabilidades, sin crear clases, leer archivos ni utilizar bases de datos.
