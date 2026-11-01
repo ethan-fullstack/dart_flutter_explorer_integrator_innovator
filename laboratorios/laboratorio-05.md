@@ -2,15 +2,15 @@
 
 En el [Laboratorio 03](laboratorio-03.md) construiste un catálogo de observaciones agrícolas con `List`, `Set` y `Map`. Después, en el [Laboratorio 04](laboratorio-04.md), transformaste ese catálogo utilizando clases, objetos, constructores, encapsulamiento y composición de objetos.
 
-En este laboratorio aprenderás a **extender el diseño mediante interfaces, herencia y composición**, detectar datos inválidos con excepciones, organizar el código en módulos, convertir modelos tipados a JSON y probar el comportamiento automáticamente.
+El procesador agrícola incorporará interfaces, herencia, composición, manejo de excepciones, módulos, conversión de JSON y pruebas automatizadas.
 
-> **Continuidad:** este laboratorio asume los fundamentos de POO desarrollados en el [Laboratorio 04](laboratorio-04.md). Incluye un recordatorio breve de clases, pero no reemplaza las prácticas de modelado y colaboración entre objetos del laboratorio anterior.
+Se retoman los modelos y la colaboración entre objetos del [Laboratorio 04](laboratorio-04.md).
 
-> **Alcance:** los datos agrícolas son **ficticios y didácticos**. El laboratorio no consulta fuentes oficiales, no produce recomendaciones agronómicas y no utiliza HTTP ni asincronía; estos últimos temas corresponden al Laboratorio 06.
+Los registros agrícolas de los ejemplos son ficticios. Se trabaja con archivos locales; las operaciones HTTP y asíncronas se abordarán en el Laboratorio 06.
 
 ## Ruta del laboratorio
 
-| Práctica | Tema | Tiempo efectivo |
+| Práctica | Tema | Duración |
 |---|---|---:|
 | 5.1 | Herencia, interfaces, polimorfismo y composición | 45 min |
 | 5.2 | Null safety, validaciones y excepciones | 40 min |
@@ -18,9 +18,7 @@ En este laboratorio aprenderás a **extender el diseño mediante interfaces, her
 | 5.4 | JSON, modelos tipados y archivos locales | 45 min |
 | 5.5 | Pruebas unitarias y casos límite | 40 min |
 | 5.6 | Reto integrador: procesador agrícola con JSON | 65 min |
-| **Total** | **Trabajo práctico** | **270 min (4,5 horas)** |
-
-La duración incluye lectura activa, ejecución, modificaciones, retos, depuración y comprobaciones, no la instalación del SDK ni la descarga de dependencias.
+| **Total** | | **270 min (4,5 horas)** |
 
 ### Objetivos
 
@@ -73,7 +71,7 @@ Ejecuta un ejemplo desde la raíz del proyecto:
 dart run bin/practice_51.dart
 ~~~
 
-Todos los identificadores, mensajes, comentarios dentro del código y nombres de archivos están en **inglés**; las explicaciones están en español. En cada práctica sigue la secuencia **predice → ejecuta → modifica → comprueba**. Corrige cada error intencional antes de proseguir.
+Los identificadores y mensajes del código están en inglés. Ejecuta los ejemplos y comprueba los cambios que realices.
 
 ---
 
@@ -1198,7 +1196,7 @@ El programa deberá:
 11. Aceptar la lista JSON vacía `[]` como un resultado sin observaciones: deberá informar que no hay datos y no dividir entre cero.
 12. Mantener una suite de pruebas unitarias para las invariantes y las conversiones, además de los escenarios manuales del programa de consola.
 
-**No se necesita** Flutter, base de datos, API HTTP, generadores de código ni paquetes de arquitectura. El único paquete añadido es `test` como dependencia de desarrollo.
+La aplicación utiliza archivos JSON locales y `package:test` como dependencia de desarrollo.
 
 ### Reglas del escenario
 
@@ -1438,11 +1436,11 @@ Introduce estos errores **uno por uno** en una copia y después restáuralos:
 4. Calcular el porcentaje del cultivo mayor usando el **total general del archivo** en lugar del total de su observación. ¿Por qué cambia el significado matemático?
 5. Permitir que el modelo conserve una lista mutable recibida por referencia. ¿Cómo podría un cambio externo invalidar sus reglas?
 
-### Reto obligatorio — Procesador de pedidos de una librería
+### Reto de aplicación — Procesador de pedidos de una librería
 
-**Enunciado.** Una librería recibe sus pedidos en un archivo JSON y necesita un programa de consola que valide la información, calcule las ventas y genere una copia normalizada. El sistema debe permitir dos presentaciones distintas del informe sin modificar las reglas de los pedidos.
+Una librería recibe sus pedidos en un archivo JSON y necesita un programa de consola que valide la información, calcule las ventas y genere una copia normalizada. El sistema debe permitir dos presentaciones distintas del informe sin modificar las reglas de los pedidos.
 
-**Requisitos**
+El programa debe:
 
 - Leer un archivo JSON con pedidos; cada pedido debe tener un identificador, el nombre de la persona compradora y uno o más productos con nombre, cantidad y precio unitario.
 - Transformar el contenido en modelos tipados que rechacen identificadores de pedido duplicados, nombres vacíos, cantidades no enteras o no positivas, precios no positivos o no finitos y totales no finitos.
